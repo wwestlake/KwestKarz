@@ -23,25 +23,41 @@ namespace KwestKarz
 
             builder.Services.AddSwaggerGen(c =>
             {
-                c.SwaggerDoc("v1", new OpenApiInfo { Title = "KwestKarz API", Version = "v1" });
+                c.SwaggerDoc("v1", new OpenApiInfo
+                {
+                    Title = "KwestKarz API",
+                    Version = "v1"
+                });
 
                 var securityScheme = new OpenApiSecurityScheme
                 {
+                    Reference = new OpenApiReference
+                    {
+                        Type = ReferenceType.SecurityScheme,
+                        Id = "Bearer"
+                    },
+                    Name = "Authorization",
                     Type = SecuritySchemeType.Http,
                     Scheme = "Bearer",
                     BearerFormat = "JWT",
                     In = ParameterLocation.Header,
-                    Description = "Paste your JWT token only — Bearer will be added automatically."
+                    Description = "Paste your JWT token here with Bearer prefix. Example: Bearer eyJ..."
                 };
 
-                c.AddSecurityDefinition("Bearer", securityScheme);
-
-                var securityRequirement = new OpenApiSecurityRequirement
+                c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
                 {
-                    { securityScheme, new[] { "Bearer" } }
-                };
+                    Name = "Authorization",
+                    Type = SecuritySchemeType.Http,
+                    Scheme = "Bearer",
+                    BearerFormat = "JWT",
+                    In = ParameterLocation.Header,
+                    Description = "Paste your JWT token here with Bearer prefix. Example: Bearer eyJ..."
+                });
 
-                c.AddSecurityRequirement(securityRequirement);
+                c.AddSecurityRequirement(new OpenApiSecurityRequirement
+                {
+                    { securityScheme, Array.Empty<string>() }
+                });
             });
 
 

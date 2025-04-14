@@ -1,5 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using System.Text.Json.Serialization;
 
 namespace KwestKarz.Entities
 {
@@ -18,6 +19,7 @@ namespace KwestKarz.Entities
 
         [Required]
         [MaxLength(256)]
+        [JsonIgnore]
         public string PasswordHash { get; set; }
 
         public bool IsActive { get; set; }
