@@ -1,8 +1,11 @@
 
 using KwestKarz.Entities;
+using KwestKarz.Services;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
+using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
+using System.Text;
 
 namespace KwestKarz
 {
@@ -25,7 +28,7 @@ namespace KwestKarz
                 var securityScheme = new OpenApiSecurityScheme
                 {
                     Type = SecuritySchemeType.Http,
-                    Scheme = "bearer",
+                    Scheme = "Bearer",
                     BearerFormat = "JWT",
                     In = ParameterLocation.Header,
                     Description = "Paste your JWT token only — Bearer will be added automatically."
@@ -47,7 +50,55 @@ namespace KwestKarz
             builder.Services.AddDbContext<KwestKarzDbContext>(options =>
                 options.UseNpgsql(builder.Configuration.GetConnectionString("KwestKarzDb")));
 
+            builder.Services.AddAuthentication("Bearer")
+                .AddJwtBearer("Bearer", options =>
+                {
+                    options.TokenValidationParameters = new TokenValidationParameters
+                    {
+                        ValidateIssuer = true,
+                        ValidateAudience = true,
+                        ValidateLifetime = true,
+                        ValidateIssuerSigningKey = true,
+                        ValidIssuer = builder.Configuration["Jwt:Issuer"],
+                        ValidAudience = builder.Configuration["Jwt:Audience"],
+                        IssuerSigningKey = new SymmetricSecurityKey(
+                            Encoding.UTF8.GetBytes(builder.Configuration["Jwt:SecretKey"]))
+                    };
+                });
+
+            builder.Services.AddAuthorization(); // make sure this is also in place
+
+
+            //////////////////////////////////////////////
+            /// system service
+            //////////////////////////////////////////////
+
+            builder.Services.AddScoped<IAccountService, AccountService>();
+            builder.Services.AddScoped<ITokenService, TokenService>();
+            builder.Services.AddScoped<IAuthService, AuthService>();
+
+
+            ////////////////////////////////////////////
+            /// Build
+            ////////////////////////////////////////////
+
             var app = builder.Build();
+
+
+            /////////////////////////////////////////////
+            /// Database Setup
+            /////////////////////////////////////////////
+
+            using (var scope = app.Services.CreateScope())
+            {
+                var dbContext = scope.ServiceProvider.GetRequiredService<KwestKarzDbContext>();
+                DbSeeder.SeedRoles(dbContext);
+                DbSeeder.SeedAdminUser(dbContext);
+            }
+
+            app.UseAuthentication();
+            app.UseAuthorization();
+
 
             // Configure the HTTP request pipeline.
             if (app.Environment.IsDevelopment())
@@ -57,9 +108,6 @@ namespace KwestKarz
             }
 
             app.UseHttpsRedirection();
-
-            app.UseAuthorization();
-
 
             app.MapControllers();
 

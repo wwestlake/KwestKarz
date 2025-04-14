@@ -22,34 +22,8 @@ namespace KwestKarz.Entities
 
         public bool IsActive { get; set; }
 
+        public bool RequiresPasswordReset { get; set; } = false;
+
         public ICollection<UserRole> Roles { get; set; } = new List<UserRole>();
-    }
-
-    public class Role
-    {
-        [Key]
-        public Guid Id { get; set; }
-
-        [Required]
-        [MaxLength(100)]
-        public string Name { get; set; }
-
-        public ICollection<UserRole> Users { get; set; } = new List<UserRole>();
-    }
-
-    public class UserRole
-    {
-        [Key]
-        public Guid Id { get; set; }
-
-        [ForeignKey("UserAccount")]
-        public Guid UserAccountId { get; set; }
-
-        public UserAccount UserAccount { get; set; }
-
-        [ForeignKey("Role")]
-        public Guid RoleId { get; set; }
-
-        public Role Role { get; set; }
     }
 }
