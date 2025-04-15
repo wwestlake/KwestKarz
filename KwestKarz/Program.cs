@@ -84,6 +84,20 @@ namespace KwestKarz
 
             builder.Services.AddAuthorization(); // make sure this is also in place
 
+            var MyAllowSpecificOrigins = "_myAllowSpecificOrigins";
+
+            builder.Services.AddCors(options =>
+            {
+                options.AddPolicy(name: MyAllowSpecificOrigins,
+                    policy =>
+                    {
+                        policy.WithOrigins("http://localhost:51537")
+                              .AllowAnyHeader()
+                              .AllowAnyMethod()
+                              .AllowCredentials(); // If using cookies or auth headers
+                    });
+            });
+
 
             //////////////////////////////////////////////
             /// system service
@@ -124,6 +138,7 @@ namespace KwestKarz
             }
 
             app.UseHttpsRedirection();
+            app.UseCors(MyAllowSpecificOrigins);
 
             app.MapControllers();
 
