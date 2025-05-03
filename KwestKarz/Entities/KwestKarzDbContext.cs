@@ -13,6 +13,7 @@ namespace KwestKarz.Entities
         public DbSet<Role> Roles { get; set; }
         public DbSet<UserRole> UserRoles { get; set; }
         public DbSet<Vehicle> Vehicles { get; set; }
+        public DbSet<LogEntry> LogEntries { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {

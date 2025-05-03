@@ -112,8 +112,30 @@ namespace KwestKarz
             /// Build
             ////////////////////////////////////////////
 
+            builder.WebHost.ConfigureKestrel(options =>
+            {
+                options.ListenAnyIP(5066);    // HTTP
+                options.ListenAnyIP(7102, listenOptions =>
+                {
+                    listenOptions.UseHttps();  // HTTPS
+                });
+            });
+
             var app = builder.Build();
 
+            app.Use(async (context, next) =>
+            {
+                try
+                {
+                    await next();
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine("EXCEPTION:");
+                    Console.WriteLine(ex.Message);
+                    throw;
+                }
+            });
 
             /////////////////////////////////////////////
             /// Database Setup

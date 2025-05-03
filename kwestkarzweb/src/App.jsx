@@ -1,6 +1,8 @@
-import { useState, useEffect } from 'react';
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import LoginPage from './LoginPage';
 import MainPage from './MainPage';
+import FleetPage from './FleetPage';
+import { useState, useEffect } from 'react';
 import { jwtDecode } from 'jwt-decode';
 
 function App() {
@@ -39,13 +41,22 @@ function App() {
     };
 
     return (
-        <>
-            {token ? (
-                <MainPage token={token} userRole={userRole} onLogout={handleLogout} />
-            ) : (
-                <LoginPage onLoginSuccess={handleLoginSuccess} />
-            )}
-        </>
+        <Router>
+            <Routes>
+                <Route
+                    path="/"
+                    element={
+                        token ? (
+                            <MainPage token={token} userRole={userRole} onLogout={handleLogout} />
+                        ) : (
+                            <LoginPage onLoginSuccess={handleLoginSuccess} />
+                        )
+                    }
+                />
+                <Route path="/fleet" element={<FleetPage token={token} />} />
+                {/* More routes coming soon */}
+            </Routes>
+        </Router>
     );
 }
 

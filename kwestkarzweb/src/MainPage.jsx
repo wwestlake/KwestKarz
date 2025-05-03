@@ -1,6 +1,9 @@
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
 
 function MainPage({ onLogout, userRole }) {
+    const navigate = useNavigate();
+
     return (
         <div className="vh-100 d-flex justify-content-center align-items-center bg-light">
             <div className="w-100 mx-auto text-center d-flex flex-column align-items-center" style={{ maxWidth: '400px' }}>
@@ -14,7 +17,12 @@ function MainPage({ onLogout, userRole }) {
 
                 <div className="d-grid gap-3 w-100">
                     {(userRole === 'Owner' || userRole === 'Admin') && (
-                        <button className="btn btn-primary btn-lg">Fleet</button>
+                        <button
+                            className="btn btn-primary btn-lg"
+                            onClick={() => navigate('/fleet')}
+                        >
+                            Fleet
+                        </button>
                     )}
 
                     {(userRole === 'Owner' || userRole === 'Admin' || userRole === 'Employee') && (

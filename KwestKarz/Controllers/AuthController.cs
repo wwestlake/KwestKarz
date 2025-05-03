@@ -32,6 +32,11 @@ namespace KwestKarz.Controllers
             {
                 return Unauthorized(ex.Message);
             }
+            catch (Exception ex)
+            {
+                // TEMPORARY: this gives you insight into what blew up
+                return StatusCode(500, $"Login failed: {ex.Message}");
+            }
         }
 
         [HttpPost("create-account")]
