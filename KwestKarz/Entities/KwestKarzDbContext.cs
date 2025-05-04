@@ -15,6 +15,8 @@ namespace KwestKarz.Entities
         public DbSet<Vehicle> Vehicles { get; set; }
         public DbSet<LogEntry> LogEntries { get; set; }
 
+        public DbSet<TripEarnings> TripEarnings { get; set; }
+
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             // Configure entity relationships and constraints here

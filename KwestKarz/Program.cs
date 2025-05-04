@@ -29,6 +29,12 @@ namespace KwestKarz
                     Version = "v1"
                 });
 
+                c.MapType<IFormFile>(() => new OpenApiSchema
+                {
+                    Type = "string",
+                    Format = "binary"
+                });
+
                 var securityScheme = new OpenApiSecurityScheme
                 {
                     Reference = new OpenApiReference
@@ -106,7 +112,8 @@ namespace KwestKarz
             builder.Services.AddScoped<IAccountService, AccountService>();
             builder.Services.AddScoped<ITokenService, TokenService>();
             builder.Services.AddScoped<IAuthService, AuthService>();
-
+            builder.Services.AddScoped<ITripEarningsService, TripEarningsService>();
+            builder.Services.AddScoped<ICSVParserService, CSVParserService>();
 
             ////////////////////////////////////////////
             /// Build
@@ -122,6 +129,7 @@ namespace KwestKarz
             });
 
             var app = builder.Build();
+
 
             app.Use(async (context, next) =>
             {
@@ -155,6 +163,7 @@ namespace KwestKarz
             // Configure the HTTP request pipeline.
             if (app.Environment.IsDevelopment())
             {
+                app.UseDeveloperExceptionPage();
                 app.UseSwagger();
                 app.UseSwaggerUI();
             }

@@ -3,6 +3,7 @@ using System;
 using KwestKarz.Entities;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -11,9 +12,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace KwestKarz.Migrations
 {
     [DbContext(typeof(KwestKarzDbContext))]
-    partial class KwestKarzDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250503231212_csv impport and earnings")]
+    partial class csvimpportandearnings
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -87,15 +90,18 @@ namespace KwestKarz.Migrations
                         .HasColumnType("text");
 
                     b.Property<string>("Guest")
+                        .IsRequired()
                         .HasColumnType("text");
 
                     b.Property<DateTime>("ImportedAt")
                         .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("PickupLocation")
+                        .IsRequired()
                         .HasColumnType("text");
 
                     b.Property<string>("ReturnLocation")
+                        .IsRequired()
                         .HasColumnType("text");
 
                     b.Property<string>("RowHash")
@@ -105,19 +111,22 @@ namespace KwestKarz.Migrations
                     b.Property<decimal?>("TotalEarnings")
                         .HasColumnType("numeric");
 
-                    b.Property<DateTime?>("TripEnd")
+                    b.Property<DateTime>("TripEnd")
                         .HasColumnType("timestamp with time zone");
 
-                    b.Property<DateTime?>("TripStart")
+                    b.Property<DateTime>("TripStart")
                         .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("TripStatus")
+                        .IsRequired()
                         .HasColumnType("text");
 
                     b.Property<string>("Vehicle")
+                        .IsRequired()
                         .HasColumnType("text");
 
                     b.Property<string>("VehicleName")
+                        .IsRequired()
                         .HasColumnType("text");
 
                     b.HasKey("ReservationID");
