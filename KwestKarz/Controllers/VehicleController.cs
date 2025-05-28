@@ -65,5 +65,20 @@ namespace KwestKarz.Controllers
             await _vehicleService.DeleteAsync(id);
             return NoContent();
         }
+
+        [HttpPost("import")]
+        [Consumes("multipart/form-data")]
+        [Authorize(Roles = "Admin")]
+        public async Task<IActionResult> ImportVehicles([FromServices] IVehicleImportService importService, [FromForm] VehicleImportRequest request)
+        {
+            if (request.File == null || request.File.Length == 0)
+                return BadRequest("No file uploaded.");
+
+            using var stream = request.File.OpenReadStream();
+            var count = await importService.ImportVehiclesAsync(stream);
+
+            return Ok(new { message = $"Import successful. {count} vehicles added." });
+        }
+
     }
 }

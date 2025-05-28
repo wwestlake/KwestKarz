@@ -3,6 +3,7 @@ using System;
 using KwestKarz.Entities;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -11,9 +12,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace KwestKarz.Migrations
 {
     [DbContext(typeof(KwestKarzDbContext))]
-    partial class KwestKarzDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250514202705_added fields for vehicle purchase date and price")]
+    partial class addedfieldsforvehiclepurchasedateandprice
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -238,145 +241,6 @@ namespace KwestKarz.Migrations
                     b.ToTable("Vehicles", "kwestkarzbusinessdata");
                 });
 
-            modelBuilder.Entity("KwestKarz.Entities.VehicleEvent", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid");
-
-                    b.Property<string>("CreatedBy")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("character varying(100)");
-
-                    b.Property<DateTime>("Date")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<string>("EventType")
-                        .IsRequired()
-                        .HasMaxLength(13)
-                        .HasColumnType("character varying(13)");
-
-                    b.Property<string>("Notes")
-                        .IsRequired()
-                        .HasMaxLength(500)
-                        .HasColumnType("character varying(500)");
-
-                    b.Property<int?>("Odometer")
-                        .HasColumnType("integer");
-
-                    b.Property<Guid>("VehicleId")
-                        .HasColumnType("uuid");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("VehicleId");
-
-                    b.ToTable("VehicleEvents", "kwestkarzbusinessdata");
-
-                    b.HasDiscriminator<string>("EventType").HasValue("VehicleEvent");
-
-                    b.UseTphMappingStrategy();
-                });
-
-            modelBuilder.Entity("KwestKarz.Entities.Maintenance.IncidentReport", b =>
-                {
-                    b.HasBaseType("KwestKarz.Entities.VehicleEvent");
-
-                    b.Property<string>("ClaimId")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("character varying(100)");
-
-                    b.Property<string>("Description")
-                        .IsRequired()
-                        .HasMaxLength(500)
-                        .HasColumnType("character varying(500)");
-
-                    b.Property<bool>("ReportedToTuro")
-                        .HasColumnType("boolean");
-
-                    b.Property<string>("Severity")
-                        .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("character varying(50)");
-
-                    b.HasDiscriminator().HasValue("Incident");
-                });
-
-            modelBuilder.Entity("KwestKarz.Entities.Maintenance.InspectionEntry", b =>
-                {
-                    b.HasBaseType("KwestKarz.Entities.VehicleEvent");
-
-                    b.Property<string>("InspectionType")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("character varying(100)");
-
-                    b.Property<string>("Inspector")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("character varying(100)");
-
-                    b.Property<string>("Result")
-                        .IsRequired()
-                        .HasMaxLength(20)
-                        .HasColumnType("character varying(20)");
-
-                    b.HasDiscriminator().HasValue("Inspection");
-                });
-
-            modelBuilder.Entity("KwestKarz.Entities.Maintenance.MaintenanceEntry", b =>
-                {
-                    b.HasBaseType("KwestKarz.Entities.VehicleEvent");
-
-                    b.Property<decimal>("Cost")
-                        .HasColumnType("decimal(18,2)");
-
-                    b.Property<string>("PerformedBy")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("character varying(100)");
-
-                    b.Property<string>("ServiceType")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("character varying(100)");
-
-                    b.ToTable("VehicleEvents", "kwestkarzbusinessdata", t =>
-                        {
-                            t.Property("Cost")
-                                .HasColumnName("MaintenanceEntry_Cost");
-                        });
-
-                    b.HasDiscriminator().HasValue("Maintenance");
-                });
-
-            modelBuilder.Entity("KwestKarz.Entities.Maintenance.RepairEntry", b =>
-                {
-                    b.HasBaseType("KwestKarz.Entities.VehicleEvent");
-
-                    b.Property<string>("ComponentAffected")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("character varying(100)");
-
-                    b.Property<decimal>("Cost")
-                        .HasColumnType("decimal(18,2)");
-
-                    b.Property<string>("RepairType")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("character varying(100)");
-
-                    b.Property<string>("ShopName")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("character varying(100)");
-
-                    b.HasDiscriminator().HasValue("Repair");
-                });
-
             modelBuilder.Entity("KwestKarz.Entities.UserRole", b =>
                 {
                     b.HasOne("KwestKarz.Entities.Role", "Role")
@@ -394,17 +258,6 @@ namespace KwestKarz.Migrations
                     b.Navigation("Role");
 
                     b.Navigation("UserAccount");
-                });
-
-            modelBuilder.Entity("KwestKarz.Entities.VehicleEvent", b =>
-                {
-                    b.HasOne("KwestKarz.Entities.Vehicle", "Vehicle")
-                        .WithMany()
-                        .HasForeignKey("VehicleId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Vehicle");
                 });
 
             modelBuilder.Entity("KwestKarz.Entities.Role", b =>

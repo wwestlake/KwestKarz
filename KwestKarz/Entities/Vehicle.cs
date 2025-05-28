@@ -42,5 +42,10 @@ namespace KwestKarz.Entities
         [MaxLength(20)]
         public string LicensePlateNumber { get; set; }
 
+        public DateTime? PurchaseDate { get; set; }
+
+        [Column(TypeName = "decimal(18,2)")]
+        public decimal? PurchasePrice { get; set; }
+
     }
 }

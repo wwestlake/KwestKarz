@@ -1,4 +1,6 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using KwestKarz.Entities;
+using KwestKarz.Entities.Maintenance;
+using Microsoft.EntityFrameworkCore;
 
 namespace KwestKarz.Entities
 {
@@ -14,14 +16,30 @@ namespace KwestKarz.Entities
         public DbSet<UserRole> UserRoles { get; set; }
         public DbSet<Vehicle> Vehicles { get; set; }
         public DbSet<LogEntry> LogEntries { get; set; }
-
         public DbSet<TripEarnings> TripEarnings { get; set; }
+
+        public DbSet<VehicleEvent> VehicleEvents { get; set; }
+
+        // CRM Entities
+        public DbSet<Guest> Guests { get; set; }
+        public DbSet<Trip> Trips { get; set; }
+        public DbSet<OutstandingCharge> OutstandingCharges { get; set; }
+        public DbSet<ContactLog> ContactLogs { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            // Configure entity relationships and constraints here
             base.OnModelCreating(modelBuilder);
+
             modelBuilder.HasDefaultSchema("kwestkarzbusinessdata");
+
+            modelBuilder.Entity<VehicleEvent>()
+                .HasDiscriminator<string>("EventType")
+                .HasValue<MaintenanceEntry>("Maintenance")
+                .HasValue<InspectionEntry>("Inspection")
+                .HasValue<IncidentReport>("Incident")
+                .HasValue<RepairEntry>("Repair");
+
+            // Optional: Fluent configuration for CRM entities could go here later
         }
-    } 
+    }
 }

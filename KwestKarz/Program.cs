@@ -114,6 +114,9 @@ namespace KwestKarz
             builder.Services.AddScoped<IAuthService, AuthService>();
             builder.Services.AddScoped<ITripEarningsService, TripEarningsService>();
             builder.Services.AddScoped<ICSVParserService, CSVParserService>();
+            builder.Services.AddScoped<IVehicleEventService, VehicleEventService>();
+            builder.Services.AddScoped<IVehicleImportService, VehicleImportService>();
+            builder.Services.AddScoped<IVehicleService, VehicleService>();
 
             ////////////////////////////////////////////
             /// Build

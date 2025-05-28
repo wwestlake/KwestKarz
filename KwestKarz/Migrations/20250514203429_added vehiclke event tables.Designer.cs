@@ -3,6 +3,7 @@ using System;
 using KwestKarz.Entities;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -11,9 +12,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace KwestKarz.Migrations
 {
     [DbContext(typeof(KwestKarzDbContext))]
-    partial class KwestKarzDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250514203429_added vehiclke event tables")]
+    partial class addedvehiclkeeventtables
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -279,31 +282,6 @@ namespace KwestKarz.Migrations
                     b.UseTphMappingStrategy();
                 });
 
-            modelBuilder.Entity("KwestKarz.Entities.Maintenance.IncidentReport", b =>
-                {
-                    b.HasBaseType("KwestKarz.Entities.VehicleEvent");
-
-                    b.Property<string>("ClaimId")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("character varying(100)");
-
-                    b.Property<string>("Description")
-                        .IsRequired()
-                        .HasMaxLength(500)
-                        .HasColumnType("character varying(500)");
-
-                    b.Property<bool>("ReportedToTuro")
-                        .HasColumnType("boolean");
-
-                    b.Property<string>("Severity")
-                        .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("character varying(50)");
-
-                    b.HasDiscriminator().HasValue("Incident");
-                });
-
             modelBuilder.Entity("KwestKarz.Entities.Maintenance.InspectionEntry", b =>
                 {
                     b.HasBaseType("KwestKarz.Entities.VehicleEvent");
@@ -343,38 +321,7 @@ namespace KwestKarz.Migrations
                         .HasMaxLength(100)
                         .HasColumnType("character varying(100)");
 
-                    b.ToTable("VehicleEvents", "kwestkarzbusinessdata", t =>
-                        {
-                            t.Property("Cost")
-                                .HasColumnName("MaintenanceEntry_Cost");
-                        });
-
                     b.HasDiscriminator().HasValue("Maintenance");
-                });
-
-            modelBuilder.Entity("KwestKarz.Entities.Maintenance.RepairEntry", b =>
-                {
-                    b.HasBaseType("KwestKarz.Entities.VehicleEvent");
-
-                    b.Property<string>("ComponentAffected")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("character varying(100)");
-
-                    b.Property<decimal>("Cost")
-                        .HasColumnType("decimal(18,2)");
-
-                    b.Property<string>("RepairType")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("character varying(100)");
-
-                    b.Property<string>("ShopName")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("character varying(100)");
-
-                    b.HasDiscriminator().HasValue("Repair");
                 });
 
             modelBuilder.Entity("KwestKarz.Entities.UserRole", b =>
