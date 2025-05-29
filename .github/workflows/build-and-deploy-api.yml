@@ -49,14 +49,3 @@ jobs:
           port: 22
           source: "./api-artifact/*"
           target: "/home/${{ secrets.DROPLET_USER }}/kwestkarz-app/"
-
-      - name: Restart service on Droplet
-        uses: appleboy/ssh-action@v0.1.7
-        with:
-          host: ${{ secrets.DROPLET_HOST }}
-          username: ${{ secrets.DROPLET_USER }}
-          key: ${{ secrets.DROPLET_SSH_KEY }}
-          passphrase: ${{ secrets.DROPLET_SSH_PASSPHRASE }}
-          port: 22
-          script: |
-            sudo systemctl restart kwestkarz.service
