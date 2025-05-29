@@ -37,6 +37,7 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: api-artifact
+          path: ./api-artifact
 
       - name: Upload build artifacts to Droplet
         uses: appleboy/scp-action@v0.1.4
