@@ -83,11 +83,11 @@ jobs:
           port: 22
           script: |
             echo "Stopping service..."
-            sudo systemctl stop kwestkarz.service || true
+            echo "$DEPLOY_SUDO_PASSWORD" | sudo -S systemctl stop kwestkarz.service || true
             echo "Running migration..."
             cd /home/${{ secrets.DROPLET_USER }}/kwestkarz-src
             dotnet ef database update
             echo "Cleaning up source..."
             rm -rf /home/${{ secrets.DROPLET_USER }}/kwestkarz-src
             echo "Starting service..."
-            sudo systemctl start kwestkarz.service
+            echo "$DEPLOY_SUDO_PASSWORD" | sudo -S systemctl start kwestkarz.service
