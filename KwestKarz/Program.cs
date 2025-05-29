@@ -117,6 +117,7 @@ namespace KwestKarz
             builder.Services.AddScoped<IVehicleEventService, VehicleEventService>();
             builder.Services.AddScoped<IVehicleImportService, VehicleImportService>();
             builder.Services.AddScoped<IVehicleService, VehicleService>();
+            builder.Services.AddScoped<IGuestService, GuestService>();
 
             ////////////////////////////////////////////
             /// Build

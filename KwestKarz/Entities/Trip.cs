@@ -5,6 +5,7 @@ namespace KwestKarz.Entities
 {
     public class Trip
     {
+        [Key]
         public int TripId { get; set; }
 
         [Required]

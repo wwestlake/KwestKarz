@@ -6,6 +6,7 @@ namespace KwestKarz.Entities
 {
     public class Guest
     {
+        [Key]
         public int GuestId { get; set; }
 
         [Required]

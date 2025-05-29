@@ -5,6 +5,7 @@ namespace KwestKarz.Entities
 {
     public class OutstandingCharge
     {
+        [Key]
         public int ChargeId { get; set; }
 
         [Required]

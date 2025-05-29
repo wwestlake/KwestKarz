@@ -1,9 +1,11 @@
 ﻿using System;
+using System.ComponentModel.DataAnnotations;
 
 namespace KwestKarz.Entities
 {
     public class ContactLog
     {
+        [Key]
         public int LogId { get; set; }
 
         public int GuestId { get; set; }
