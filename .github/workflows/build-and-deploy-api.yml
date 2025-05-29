@@ -95,6 +95,6 @@ jobs:
             cd /home/${{ secrets.DROPLET_USER }}/kwestkarz-src
             ~/.dotnet/tools/dotnet-ef database update --project KwestKarz/KwestKarz.csproj
             echo "Cleaning up source..."
-            rm -rf /home/${{ secrets.DROPLET_USER }}/kwestkarz-src
+            # rm -rf /home/${{ secrets.DROPLET_USER }}/kwestkarz-src
             echo "Starting service..."
             echo "$DEPLOY_SUDO_PASSWORD" | sudo -S systemctl start kwestkarz.service
