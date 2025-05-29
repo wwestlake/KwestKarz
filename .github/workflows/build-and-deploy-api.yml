@@ -27,6 +27,12 @@ jobs:
           name: api-artifact
           path: ./publish
 
+      - name: Upload source code
+        uses: actions/upload-artifact@v4
+        with:
+          name: api-source
+          path: ./KwestKarz
+
   deploy:
     needs: build
     runs-on: ubuntu-latest
@@ -39,6 +45,12 @@ jobs:
           name: api-artifact
           path: ./api-artifact
 
+      - name: Download source code
+        uses: actions/download-artifact@v4
+        with:
+          name: api-source
+          path: ./api-source
+
       - name: Upload build artifacts to Droplet
         uses: appleboy/scp-action@v0.1.4
         with:
@@ -49,3 +61,33 @@ jobs:
           port: 22
           source: "./api-artifact/*"
           target: "/home/${{ secrets.DROPLET_USER }}/kwestkarz-app/"
+
+      - name: Upload source code to Droplet
+        uses: appleboy/scp-action@v0.1.4
+        with:
+          host: ${{ secrets.DROPLET_HOST }}
+          username: ${{ secrets.DROPLET_USER }}
+          key: ${{ secrets.DROPLET_SSH_KEY }}
+          passphrase: ${{ secrets.DROPLET_SSH_PASSPHRASE }}
+          port: 22
+          source: "./api-source/*"
+          target: "/home/${{ secrets.DROPLET_USER }}/kwestkarz-src/"
+
+      - name: Run schema migration and start service
+        uses: appleboy/ssh-action@v0.1.7
+        with:
+          host: ${{ secrets.DROPLET_HOST }}
+          username: ${{ secrets.DROPLET_USER }}
+          key: ${{ secrets.DROPLET_SSH_KEY }}
+          passphrase: ${{ secrets.DROPLET_SSH_PASSPHRASE }}
+          port: 22
+          script: |
+            echo "Stopping service..."
+            sudo systemctl stop kwestkarz.service || true
+            echo "Running migration..."
+            cd /home/${{ secrets.DROPLET_USER }}/kwestkarz-src
+            dotnet ef database update
+            echo "Cleaning up source..."
+            rm -rf /home/${{ secrets.DROPLET_USER }}/kwestkarz-src
+            echo "Starting service..."
+            sudo systemctl start kwestkarz.service
