@@ -22,7 +22,7 @@ jobs:
         run: dotnet publish ./KwestKarz/KwestKarz.csproj -c Release -o ./publish
 
       - name: Upload build artifacts
-        uses: actions/upload-artifact@v3.1.2
+        uses: actions/upload-artifact@v2
         with:
           name: api-artifact
           path: ./publish
