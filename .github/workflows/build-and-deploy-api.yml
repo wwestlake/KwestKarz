@@ -92,8 +92,8 @@ jobs:
             mkdir -p ~/.dotnet/tools
             dotnet tool install dotnet-ef --tool-path ~/.dotnet/tools || true
             echo "Running migration..."
-            cd /home/${{ secrets.DROPLET_USER }}/kwestkarz-src
-            ~/.dotnet/tools/dotnet-ef database update --project KwestKarz/KwestKarz.csproj
+            cd /home/${{ secrets.DROPLET_USER }}/kwestkarz-src/api-source
+            ~/.dotnet/tools/dotnet-ef database update --project KwestKarz.csproj
             echo "Cleaning up source..."
             # rm -rf /home/${{ secrets.DROPLET_USER }}/kwestkarz-src
             echo "Starting service..."
