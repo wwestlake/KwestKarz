@@ -75,6 +75,8 @@ jobs:
 
       - name: Run schema migration and start service
         uses: appleboy/ssh-action@v0.1.7
+        env:
+          DEPLOY_SUDO_PASSWORD: ${{ secrets.DEPLOY_SUDO_PASSWORD }}
         with:
           host: ${{ secrets.DROPLET_HOST }}
           username: ${{ secrets.DROPLET_USER }}
@@ -85,6 +87,7 @@ jobs:
             echo "Stopping service..."
             echo "$DEPLOY_SUDO_PASSWORD" | sudo -S systemctl stop kwestkarz.service || true
             echo "Running migration..."
+            export PATH="$PATH:/home/${{ secrets.DROPLET_USER }}/.dotnet"
             cd /home/${{ secrets.DROPLET_USER }}/kwestkarz-src
             dotnet ef database update
             echo "Cleaning up source..."
