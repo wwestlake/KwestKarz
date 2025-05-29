@@ -85,16 +85,16 @@ jobs:
           port: 22
           script: |
             echo "Stopping service..."
-            echo "${DEPLOY_SUDO_PASSWORD}" | sudo -S systemctl stop kwestkarz.service || true
+            echo "$DEPLOY_SUDO_PASSWORD" | sudo -S systemctl stop kwestkarz.service || true
             echo "Installing dotnet-ef locally..."
             export DOTNET_ROOT=~/.dotnet
             export PATH=$PATH:$DOTNET_ROOT:$DOTNET_ROOT/tools:~/.dotnet/tools
             mkdir -p ~/.dotnet/tools
             dotnet tool install dotnet-ef --tool-path ~/.dotnet/tools || true
             echo "Running migration..."
-            cd /home/${{ secrets.DROPLET_USER }}/kwestkarz-src/KwestKarz
-            ~/.dotnet/tools/dotnet-ef database update
+            cd /home/${{ secrets.DROPLET_USER }}/kwestkarz-src
+            ~/.dotnet/tools/dotnet-ef database update --project KwestKarz/KwestKarz.csproj
             echo "Cleaning up source..."
             rm -rf /home/${{ secrets.DROPLET_USER }}/kwestkarz-src
             echo "Starting service..."
-            echo "${DEPLOY_SUDO_PASSWORD}" | sudo -S systemctl start kwestkarz.service
+            echo "$DEPLOY_SUDO_PASSWORD" | sudo -S systemctl start kwestkarz.service
