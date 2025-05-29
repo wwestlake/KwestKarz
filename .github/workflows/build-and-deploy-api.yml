@@ -59,4 +59,4 @@ jobs:
           passphrase: ${{ secrets.DROPLET_SSH_PASSPHRASE }}
           port: 22
           script: |
-            sudo systemctl restart kwestkarz.service
+            echo ${{ secrets.DROPLET_USER }} | sudo -S systemctl restart kwestkarz.service
