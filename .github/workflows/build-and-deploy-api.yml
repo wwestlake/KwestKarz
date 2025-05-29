@@ -38,7 +38,18 @@ jobs:
         with:
           name: api-artifact
 
-      - name: Deploy to DigitalOcean Droplet
+      - name: Upload build artifacts to Droplet
+        uses: appleboy/scp-action@v0.1.4
+        with:
+          host: ${{ secrets.DROPLET_HOST }}
+          username: ${{ secrets.DROPLET_USER }}
+          key: ${{ secrets.DROPLET_SSH_KEY }}
+          passphrase: ${{ secrets.DROPLET_SSH_PASSPHRASE }}
+          port: 22
+          source: "./api-artifact/*"
+          target: "/home/${{ secrets.DROPLET_USER }}/kwestkarz-app/"
+
+      - name: Restart service on Droplet
         uses: appleboy/ssh-action@v0.1.7
         with:
           host: ${{ secrets.DROPLET_HOST }}
@@ -47,7 +58,4 @@ jobs:
           passphrase: ${{ secrets.DROPLET_SSH_PASSPHRASE }}
           port: 22
           script: |
-            rm -rf /home/wwestlake/kwestkarz-app/*
-            mkdir -p /home/wwestlake/kwestkarz-app/
-            cp -r ./publish/* /home/wwestlake/kwestkarz-app/
             sudo systemctl restart kwestkarz.service
