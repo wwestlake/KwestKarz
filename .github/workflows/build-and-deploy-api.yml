@@ -26,3 +26,27 @@ jobs:
         with:
           name: api-artifact
           path: ./publish
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push'
+
+    steps:
+      - name: Download build artifacts
+        uses: actions/download-artifact@v3
+        with:
+          name: api-artifact
+
+      - name: Deploy to DigitalOcean Droplet
+        uses: appleboy/ssh-action@v0.1.7
+        with:
+          host: ${{ secrets.DROPLET_IP }}
+          username: ${{ secrets.DROPLET_USER }}
+          key: ${{ secrets.DROPLET_SSH_KEY }}
+          port: 22
+          script: |
+            rm -rf /home/wwestlake/kwestkarz-app/*
+            mkdir -p /home/wwestlake/kwestkarz-app/
+            cp -r ./publish/* /home/wwestlake/kwestkarz-app/
+            sudo systemctl restart kwestkarz.service
