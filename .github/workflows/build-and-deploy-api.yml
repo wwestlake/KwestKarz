@@ -86,10 +86,14 @@ jobs:
           script: |
             echo "Stopping service..."
             echo "$DEPLOY_SUDO_PASSWORD" | sudo -S systemctl stop kwestkarz.service || true
+            echo "Installing dotnet-ef locally..."
+            export DOTNET_ROOT=~/.dotnet
+            export PATH=$PATH:$DOTNET_ROOT:$DOTNET_ROOT/tools:~/.dotnet/tools
+            mkdir -p ~/.dotnet/tools
+            dotnet tool install dotnet-ef --tool-path ~/.dotnet/tools || true
             echo "Running migration..."
-            export PATH="$PATH:/home/${{ secrets.DROPLET_USER }}/.dotnet"
             cd /home/${{ secrets.DROPLET_USER }}/kwestkarz-src
-            dotnet ef database update
+            ~/.dotnet/tools/dotnet-ef database update
             echo "Cleaning up source..."
             rm -rf /home/${{ secrets.DROPLET_USER }}/kwestkarz-src
             echo "Starting service..."
