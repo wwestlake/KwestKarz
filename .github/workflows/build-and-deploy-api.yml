@@ -41,7 +41,7 @@ jobs:
       - name: Deploy to DigitalOcean Droplet
         uses: appleboy/ssh-action@v0.1.7
         with:
-          host: ${{ secrets.DROPLET_IP }}
+          host: ${{ secrets.DROPLET_HOST }}
           username: ${{ secrets.DROPLET_USER }}
           key: ${{ secrets.DROPLET_SSH_KEY }}
           passphrase: ${{ secrets.DROPLET_SSH_PASSPHRASE }}
@@ -51,4 +51,3 @@ jobs:
             mkdir -p /home/wwestlake/kwestkarz-app/
             cp -r ./publish/* /home/wwestlake/kwestkarz-app/
             sudo systemctl restart kwestkarz.service
-            
