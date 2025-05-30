@@ -67,7 +67,12 @@ namespace KwestKarz
             });
 
 
-            builder.Configuration.AddUserSecrets<Program>();
+            builder.Configuration
+                    .SetBasePath(Directory.GetCurrentDirectory())
+                    .AddJsonFile("appsettings.json", optional: true, reloadOnChange: true)
+                    .AddUserSecrets<Program>(optional: true)
+                    .AddEnvironmentVariables();
+
 
             builder.Services.AddDbContext<KwestKarzDbContext>(options =>
                 options.UseNpgsql(builder.Configuration.GetConnectionString("KwestKarzDb")));
