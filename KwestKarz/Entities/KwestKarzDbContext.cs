@@ -26,6 +26,19 @@ namespace KwestKarz.Entities
         public DbSet<OutstandingCharge> OutstandingCharges { get; set; }
         public DbSet<ContactLog> ContactLogs { get; set; }
 
+        protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+        {
+            var configuration = new ConfigurationBuilder()
+                .SetBasePath(AppContext.BaseDirectory)
+                .AddJsonFile("appsettings.json", optional: true, reloadOnChange: true)
+                .AddUserSecrets<Program>()
+                .AddEnvironmentVariables()
+                .Build();
+
+            optionsBuilder.UseNpgsql(configuration.GetConnectionString("KwestKarzDb"));
+        }
+
+
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
