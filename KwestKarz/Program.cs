@@ -175,9 +175,10 @@ namespace KwestKarz
                 app.UseDeveloperExceptionPage();
                 app.UseSwagger();
                 app.UseSwaggerUI();
+                app.UseHttpsRedirection();
             }
 
-            app.UseHttpsRedirection();
+           
             app.UseCors(MyAllowSpecificOrigins);
 
             app.MapControllers();
