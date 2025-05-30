@@ -92,6 +92,7 @@ jobs:
             mkdir -p ~/.dotnet/tools
             dotnet tool install dotnet-ef --tool-path ~/.dotnet/tools || true
             echo "Running migration..."
+            export ConnectionStrings__KwestKarzDb="Host=localhost;Database=kwestkarz;Username=kwestkarz_user;Password=df9/V\"mQ44R?"
             cd /home/${{ secrets.DROPLET_USER }}/kwestkarz-src/api-source
             ~/.dotnet/tools/dotnet-ef database update --project KwestKarz.csproj
             echo "Cleaning up source..."
