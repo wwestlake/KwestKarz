@@ -1,6 +1,7 @@
 
 using KwestKarz.Entities;
 using KwestKarz.Services;
+using KwestKarz.Services.Configuration;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
@@ -102,7 +103,7 @@ namespace KwestKarz
                 options.AddPolicy(name: MyAllowSpecificOrigins,
                     policy =>
                     {
-                        policy.WithOrigins("http://localhost:51537")
+                        policy.WithOrigins("http://localhost:5173")
                               .AllowAnyHeader()
                               .AllowAnyMethod()
                               .AllowCredentials(); // If using cookies or auth headers
@@ -123,6 +124,8 @@ namespace KwestKarz
             builder.Services.AddScoped<IVehicleImportService, VehicleImportService>();
             builder.Services.AddScoped<IVehicleService, VehicleService>();
             builder.Services.AddScoped<IGuestService, GuestService>();
+            builder.Services.Configure<GoogleEmailSettings>(builder.Configuration.GetSection("google"));
+            builder.Services.AddTransient<IEmailService, EmailService>();
 
             ////////////////////////////////////////////
             /// Build

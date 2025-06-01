@@ -82,6 +82,8 @@ jobs:
           username: ${{ secrets.DROPLET_USER }}
           key: ${{ secrets.DROPLET_SSH_KEY }}
           passphrase: ${{ secrets.DROPLET_SSH_PASSPHRASE }}
+          google_email_addr: ${{ secrets.GOOGLE_EMAIL_ADDR }}  
+          google_smtp_password: ${{ secrets.GOOGLE_SMTP_PASSWORD }}
           port: 22
           script: |
             echo "Stopping service..."
@@ -93,6 +95,8 @@ jobs:
             dotnet tool install dotnet-ef --tool-path ~/.dotnet/tools || true
             echo "Running migration..."
             export ConnectionStrings__KwestKarzDb="Host=localhost;Database=kwestkarz;Username=kwestkarz_user;Password=htrv6gpl1234!@#$"
+            export google__email="${{ secrets.GOOGLE_EMAIL_ADDR }}"
+            export google__password="${{ secrets.GOOGLE_SMTP_PASSWORD }}"
             cd /home/${{ secrets.DROPLET_USER }}/kwestkarz-src/api-source
             ~/.dotnet/tools/dotnet-ef database update --project KwestKarz.csproj
             echo "Cleaning up source..."
