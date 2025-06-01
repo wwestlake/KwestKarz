@@ -26,6 +26,7 @@ namespace KwestKarz.Entities
         public DbSet<OutstandingCharge> OutstandingCharges { get; set; }
         public DbSet<ContactLog> ContactLogs { get; set; }
 
+        public DbSet<TechLog> TechLogs { get; set; }
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
             var configuration = new ConfigurationBuilder()
