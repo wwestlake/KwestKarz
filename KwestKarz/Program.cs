@@ -127,7 +127,7 @@ namespace KwestKarz
             builder.Services.Configure<GoogleEmailSettings>(builder.Configuration.GetSection("google"));
             builder.Services.AddTransient<IEmailService, EmailService>();
             builder.Services.AddScoped<ILogService, LogService>();
-
+            builder.Services.AddScoped<IApiKeyService,  ApiKeyService>();
 
             ////////////////////////////////////////////
             /// Build
