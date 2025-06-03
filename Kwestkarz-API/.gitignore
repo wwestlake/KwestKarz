@@ -1,0 +1,52 @@
+## Visual Studio 2022
+.vs/
+*.user
+*.suo
+*.sln.docstates
+
+## Build results
+bin/
+obj/
+Generated_Code/
+
+## Entity Framework junk
+Migrations/obj/
+Migrations/bin/
+
+## ASP.NET Secrets / Configs
+secrets/
+*.local.json
+*.development.json
+*.env
+
+## Logs
+*.log
+logs/
+
+## MongoDB dumps / data
+dump/
+*.local.mongo.json
+
+## User Specific
+*.dbmdl
+*.pfx
+*.publishsettings
+
+## Rider / JetBrains (just in case)
+.idea/
+*.DotSettings.user
+
+## Backup & Crash Reports
+*.bak
+*.old
+*.orig
+
+## Others
+Thumbs.db
+Desktop.ini
+.DS_Store
+
+## Node / React (if later used)
+frontend/node_modules/
+frontend/build/
+
