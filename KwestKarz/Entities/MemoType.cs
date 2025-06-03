@@ -1,6 +1,13 @@
 ﻿namespace KwestKarz.Entities
 {
-    public class MemoType
+    public enum MemoType
     {
+        Reminder,
+        Directive,
+        Thought,
+        LogEntry,
+        Insight,
+        Scratch,
+        PromptLog
     }
 }

@@ -128,6 +128,7 @@ namespace KwestKarz
             builder.Services.AddTransient<IEmailService, EmailService>();
             builder.Services.AddScoped<ILogService, LogService>();
             builder.Services.AddScoped<IApiKeyService,  ApiKeyService>();
+            builder.Services.AddScoped<IMemoService, MemoService>();
 
             ////////////////////////////////////////////
             /// Build
@@ -143,7 +144,7 @@ namespace KwestKarz
             });
 
             var app = builder.Build();
-
+            app.UseMiddleware<KwestKarz.Middleware.ApiKey.ApiKeyAuthenticationMiddleware>();
 
             app.Use(async (context, next) =>
             {

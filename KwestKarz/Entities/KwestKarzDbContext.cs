@@ -31,6 +31,8 @@ namespace KwestKarz.Entities
         public DbSet<ApiClientKey> ApiClientKeys { get; set; }
         public DbSet<ApiClientClaim> ApiClientClaims { get; set; }
 
+        public DbSet<Memo> Memos { get; set; }
+
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
