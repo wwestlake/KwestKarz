@@ -27,6 +27,11 @@ namespace KwestKarz.Entities
         public DbSet<ContactLog> ContactLogs { get; set; }
 
         public DbSet<TechLog> TechLogs { get; set; }
+
+        public DbSet<ApiClientKey> ApiClientKeys { get; set; }
+        public DbSet<ApiClientClaim> ApiClientClaims { get; set; }
+
+
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
             var configuration = new ConfigurationBuilder()
@@ -52,6 +57,12 @@ namespace KwestKarz.Entities
                 .HasValue<InspectionEntry>("Inspection")
                 .HasValue<IncidentReport>("Incident")
                 .HasValue<RepairEntry>("Repair");
+
+            modelBuilder.Entity<ApiClientClaim>()
+                .HasOne(c => c.ApiClientKey)
+                .WithMany(k => k.Claims)
+                .HasForeignKey(c => c.ApiClientKeyId);
+
 
             // Optional: Fluent configuration for CRM entities could go here later
         }
