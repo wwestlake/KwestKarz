@@ -93,7 +93,7 @@ jobs:
           source: "api-artifact/**"
           target: "/var/www/html"
       
-      - name: Deploy to server via SSH
+      - name: Deploy to server via SSH ${{ secrets.DEPLOY_SUDO_PASSWORD }}
         uses: appleboy/ssh-action@v0.1.7
         with:
           host: ${{ secrets.DROPLET_HOST }}
