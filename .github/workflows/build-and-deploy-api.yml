@@ -1,4 +1,4 @@
-name: Build and Deploy API and UI
+name: Build and Deploy App & API
 
 on:
   push:
@@ -19,39 +19,61 @@ jobs:
           dotnet-version: 8.0.x
 
       - name: Build and publish API
-        run: dotnet publish ./KwestKarz-API/KwestKarz/KwestKarz.csproj -c Release -o ./publish
+        run: dotnet publish ./KwestKarz-API/KwestKarz/KwestKarz.csproj -c Release -o ./publish-api
 
-      - name: Upload API build artifacts
+      - name: Upload API artifact
         uses: actions/upload-artifact@v4
         with:
           name: api-artifact
-          path: ./publish
+          path: ./publish-api
 
-      - name: Upload API source code
+      - name: Upload API source
         uses: actions/upload-artifact@v4
         with:
           name: api-source
           path: ./KwestKarz-API
 
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Build React frontend
+        run: |
+          cd KwestKarz-Portal
+          npm ci
+          npm run build
+
+      - name: Upload frontend artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: frontend-artifact
+          path: ./KwestKarz-Portal/dist
+
   deploy:
     needs: build
     runs-on: ubuntu-latest
-    if: github.event_name == 'push'
 
     steps:
-      - name: Download API build artifacts
+      - name: Download API artifact
         uses: actions/download-artifact@v4
         with:
           name: api-artifact
           path: ./api-artifact
 
-      - name: Download API source code
+      - name: Download API source
         uses: actions/download-artifact@v4
         with:
           name: api-source
           path: ./api-source
 
-      - name: Upload API build to Droplet
+      - name: Download frontend artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: frontend-artifact
+          path: ./frontend-artifact
+
+      - name: Upload API artifact to Droplet
         uses: appleboy/scp-action@v0.1.4
         with:
           host: ${{ secrets.DROPLET_HOST }}
@@ -73,9 +95,20 @@ jobs:
           source: "./api-source/*"
           target: "/home/${{ secrets.DROPLET_USER }}/kwestkarz-src/"
 
+      - name: Upload frontend dist to NGINX root
+        uses: appleboy/scp-action@v0.1.4
+        with:
+          host: ${{ secrets.DROPLET_HOST }}
+          username: ${{ secrets.DROPLET_USER }}
+          key: ${{ secrets.DROPLET_SSH_KEY }}
+          passphrase: ${{ secrets.DROPLET_SSH_PASSPHRASE }}
+          port: 22
+          source: "./frontend-artifact/*"
+          target: "/var/www/html/"
+
       - name: Run migration and restart API service
         uses: appleboy/ssh-action@v0.1.7
-        envs: GOOGLE_EMAIL_ADDR,GOOGLE_SMTP_PASSWORD,DEPLOY_SUDO_PASSWORD
+        envs: DEPLOY_SUDO_PASSWORD,GOOGLE_EMAIL_ADDR,GOOGLE_SMTP_PASSWORD
         with:
           host: ${{ secrets.DROPLET_HOST }}
           username: ${{ secrets.DROPLET_USER }}
@@ -92,8 +125,8 @@ jobs:
             dotnet tool install dotnet-ef --tool-path ~/.dotnet/tools || true
             echo "Running migration..."
             export ConnectionStrings__KwestKarzDb="Host=localhost;Database=kwestkarz;Username=kwestkarz_user;Password=htrv6gpl1234!@#$"
-            export google__email="$GOOGLE_EMAIL_ADDR"
-            export google__password="$GOOGLE_SMTP_PASSWORD"
+            export google__email="${GOOGLE_EMAIL_ADDR}"
+            export google__password="${GOOGLE_SMTP_PASSWORD}"
             cd /home/${{ secrets.DROPLET_USER }}/kwestkarz-src/KwestKarz/KwestKarz
             ~/.dotnet/tools/dotnet-ef database update --project KwestKarz.csproj
             echo "Starting service..."
