@@ -29,17 +29,15 @@ jobs:
 
       - name: Build frontend
         working-directory: ./KwestKarz-Portal
-        run: |
-          npm ci
-          npm run build
+        run: npm run build
         env:
           VITE_API_BASE_URL: https://kwestkarz.lagdaemon.com/api
-      
+
       - name: Upload frontend artifacts
         uses: actions/upload-artifact@v4
         with:
           name: portal-artifact
-          path: ./KwestKarz-Portal/dist
+          path: ./KwestKarz-Portal/dist/*
 
       - name: Build and publish API
         run: dotnet publish ./Kwestkarz-API/KwestKarz/KwestKarz.csproj -c Release -o ./publish
@@ -50,87 +48,41 @@ jobs:
           name: api-artifact
           path: ./publish
 
-      - name: Upload API source code
-        uses: actions/upload-artifact@v4
-        with:
-          name: api-source
-          path: ./Kwestkarz-API
-
   deploy:
-    needs: build
     runs-on: ubuntu-latest
-    if: github.event_name == 'push'
+    needs: build
 
     steps:
       - name: Download frontend artifacts
         uses: actions/download-artifact@v4
         with:
           name: portal-artifact
-          path: ./portal-artifact
+          path: portal-artifact
 
-      - name: Download API build artifacts
+      - name: Download API artifacts
         uses: actions/download-artifact@v4
         with:
           name: api-artifact
-          path: ./api-artifact
+          path: api-artifact
 
-      - name: Download API source code
-        uses: actions/download-artifact@v4
-        with:
-          name: api-source
-          path: ./api-source
-
-      - name: Upload frontend to Droplet
-        uses: appleboy/scp-action@v0.1.4
-        with:
-          host: ${{ secrets.DROPLET_HOST }}
-          username: ${{ secrets.DROPLET_USER }}
-          key: ${{ secrets.DROPLET_SSH_KEY }}
-          passphrase: ${{ secrets.DROPLET_SSH_PASSPHRASE }}
-          port: 22
-          source: "./portal-artifact/*"
-          target: "/var/www/html/portal-artifact/"
-
-      - name: Upload API to Droplet
-        uses: appleboy/scp-action@v0.1.4
-        with:
-          host: ${{ secrets.DROPLET_HOST }}
-          username: ${{ secrets.DROPLET_USER }}
-          key: ${{ secrets.DROPLET_SSH_KEY }}
-          passphrase: ${{ secrets.DROPLET_SSH_PASSPHRASE }}
-          port: 22
-          source: "./api-artifact/*"
-          target: "/home/${{ secrets.DROPLET_USER }}/kwestkarz-app/"
-
-      - name: Upload API source to Droplet
-        uses: appleboy/scp-action@v0.1.4
-        with:
-          host: ${{ secrets.DROPLET_HOST }}
-          username: ${{ secrets.DROPLET_USER }}
-          key: ${{ secrets.DROPLET_SSH_KEY }}
-          passphrase: ${{ secrets.DROPLET_SSH_PASSPHRASE }}
-          port: 22
-          source: "./api-source/*"
-          target: "/home/${{ secrets.DROPLET_USER }}/kwestkarz-src/"
-
-      - name: Run schema migration and restart service
+      - name: Deploy to server via SSH
         uses: appleboy/ssh-action@v0.1.7
         with:
-          host: ${{ secrets.DROPLET_HOST }}
-          username: ${{ secrets.DROPLET_USER }}
-          key: ${{ secrets.DROPLET_SSH_KEY }}
-          passphrase: ${{ secrets.DROPLET_SSH_PASSPHRASE }}
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USER }}
+          key: ${{ secrets.SSH_KEY }}
           port: 22
           script: |
-            set -e
             echo "$DEPLOY_SUDO_PASSWORD" | sudo -S systemctl stop kwestkarz.service || true
             export DOTNET_ROOT=~/.dotnet
             export PATH=$PATH:$DOTNET_ROOT:$DOTNET_ROOT/tools:~/.dotnet/tools
             mkdir -p ~/.dotnet/tools
             dotnet tool install dotnet-ef --tool-path ~/.dotnet/tools || true
-            export ConnectionStrings__KwestKarzDb="Host=localhost;Database=kwestkarz;Username=kwestkarz_user;Password=htrv6gpl1234!@#$"
-            export google__email="${{ secrets.GOOGLE_EMAIL_ADDR }}"
-            export google__password="${{ secrets.GOOGLE_SMTP_PASSWORD }}"
-            cd /home/${{ secrets.DROPLET_USER }}/kwestkarz-src/api-source/KwestKarz
+            export ConnectionStrings__KwestKarzDb="${{ secrets.CONNECTION_STRING }}"
+            export google__email="${{ secrets.GOOGLE_EMAIL }}"
+            export google__password="${{ secrets.GOOGLE_PASSWORD }}"
+            cd /home/${{ secrets.SSH_USER }}/kwestkarz-src/Kwestkarz-API/KwestKarz
             ~/.dotnet/tools/dotnet-ef database update --project KwestKarz.csproj
+            echo "$DEPLOY_SUDO_PASSWORD" | sudo -S cp -r ~/portal-artifact/* /var/www/html/
+            echo "$DEPLOY_SUDO_PASSWORD" | sudo -S cp -r ~/api-artifact/* /var/www/kwestkarz-api/
             echo "$DEPLOY_SUDO_PASSWORD" | sudo -S systemctl start kwestkarz.service
