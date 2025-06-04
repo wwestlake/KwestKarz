@@ -68,10 +68,12 @@ jobs:
       - name: Deploy to server via SSH
         uses: appleboy/ssh-action@v0.1.7
         with:
-          host: ${{ secrets.SSH_HOST }}
-          username: ${{ secrets.SSH_USER }}
-          key: ${{ secrets.SSH_KEY }}
+          host: ${{ secrets.DROPLET_HOST }}
+          username: ${{ secrets.DROPLET_USER }}
+          key: ${{ secrets.DROPLET_SSH_KEY }}
           passphrase: ${{ secrets.DROPLET_SSH_PASSPHRASE }}
+          google_email_addr: ${{ secrets.GOOGLE_EMAIL_ADDR }}
+          google_smtp_password: ${{ secrets.GOOGLE_SMTP_PASSWORD }}
           port: 22
           script: |
             echo "$DEPLOY_SUDO_PASSWORD" | sudo -S systemctl stop kwestkarz.service || true
