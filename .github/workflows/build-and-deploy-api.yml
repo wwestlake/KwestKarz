@@ -1,4 +1,4 @@
-name: Build and Deploy App & API
+name: Build and Deploy API and Portal
 
 on:
   push:
@@ -18,6 +18,27 @@ jobs:
         with:
           dotnet-version: 8.0.x
 
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: 20
+
+      - name: Install frontend dependencies
+        working-directory: ./KwestKarz-Portal
+        run: npm ci
+
+      - name: Build frontend
+        working-directory: ./KwestKarz-Portal
+        run: |
+          echo "VITE_API_BASE_URL=https://kwestkarz.lagdaemon.com/api" > .env
+          npm run build
+
+      - name: Upload frontend artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: portal-artifact
+          path: ./KwestKarz-Portal/dist
+
       - name: Build and publish API
         run: dotnet publish ./Kwestkarz-API/KwestKarz/KwestKarz.csproj -c Release -o ./publish
 
@@ -33,46 +54,40 @@ jobs:
           name: api-source
           path: ./Kwestkarz-API
 
-      - name: Setup Node
-        uses: actions/setup-node@v4
-        with:
-          node-version: 20
-
-      - name: Install frontend dependencies
-        run: cd KwestKarz-Portal && npm ci
-
-      - name: Build frontend
-        run: cd KwestKarz-Portal && npm run build
-
-      - name: Upload frontend artifacts
-        uses: actions/upload-artifact@v4
-        with:
-          name: portal-artifact
-          path: ./KwestKarz-Portal/dist
-
   deploy:
     needs: build
     runs-on: ubuntu-latest
     if: github.event_name == 'push'
 
     steps:
-      - name: Download API artifacts
+      - name: Download frontend artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: portal-artifact
+          path: ./portal-artifact
+
+      - name: Download API build artifacts
         uses: actions/download-artifact@v4
         with:
           name: api-artifact
           path: ./api-artifact
 
-      - name: Download API source
+      - name: Download API source code
         uses: actions/download-artifact@v4
         with:
           name: api-source
           path: ./api-source
 
-      - name: Download frontend
-        uses: actions/download-artifact@v4
+      - name: Upload frontend to Droplet
+        uses: appleboy/scp-action@v0.1.4
         with:
-          name: portal-artifact
-          path: ./portal-artifact
+          host: ${{ secrets.DROPLET_HOST }}
+          username: ${{ secrets.DROPLET_USER }}
+          key: ${{ secrets.DROPLET_SSH_KEY }}
+          passphrase: ${{ secrets.DROPLET_SSH_PASSPHRASE }}
+          port: 22
+          source: "./portal-artifact/*"
+          target: "/var/www/html/portal-artifact/"
 
       - name: Upload API to Droplet
         uses: appleboy/scp-action@v0.1.4
@@ -85,7 +100,7 @@ jobs:
           source: "./api-artifact/*"
           target: "/home/${{ secrets.DROPLET_USER }}/kwestkarz-app/"
 
-      - name: Upload API Source
+      - name: Upload API source to Droplet
         uses: appleboy/scp-action@v0.1.4
         with:
           host: ${{ secrets.DROPLET_HOST }}
@@ -96,18 +111,7 @@ jobs:
           source: "./api-source/*"
           target: "/home/${{ secrets.DROPLET_USER }}/kwestkarz-src/"
 
-      - name: Upload frontend to Droplet
-        uses: appleboy/scp-action@v0.1.4
-        with:
-          host: ${{ secrets.DROPLET_HOST }}
-          username: ${{ secrets.DROPLET_USER }}
-          key: ${{ secrets.DROPLET_SSH_KEY }}
-          passphrase: ${{ secrets.DROPLET_SSH_PASSPHRASE }}
-          port: 22
-          source: "./portal-artifact/*"
-          target: "/var/www/html/"
-
-      - name: SSH Run migration and restart API
+      - name: Run schema migration and restart service
         uses: appleboy/ssh-action@v0.1.7
         with:
           host: ${{ secrets.DROPLET_HOST }}
@@ -125,6 +129,6 @@ jobs:
             export ConnectionStrings__KwestKarzDb="Host=localhost;Database=kwestkarz;Username=kwestkarz_user;Password=htrv6gpl1234!@#$"
             export google__email="${{ secrets.GOOGLE_EMAIL_ADDR }}"
             export google__password="${{ secrets.GOOGLE_SMTP_PASSWORD }}"
-            cd /home/${{ secrets.DROPLET_USER }}/kwestkarz-src/api-source/KwestKarz
+            cd /home/${{ secrets.DROPLET_USER }}/kwestkarz-src/Kwestkarz-API/KwestKarz
             ~/.dotnet/tools/dotnet-ef database update --project KwestKarz.csproj
             echo "$DEPLOY_SUDO_PASSWORD" | sudo -S systemctl start kwestkarz.service
