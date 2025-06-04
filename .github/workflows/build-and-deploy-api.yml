@@ -84,9 +84,9 @@ jobs:
             export google__password="${{ secrets.GOOGLE_SMTP_PASSWORD }}"
             cd /home/${{ secrets.DROPLET_USER }}/kwestkarz-src/Kwestkarz-API/KwestKarz
             ~/.dotnet/tools/dotnet-ef database update --project KwestKarz.csproj
-            echo "$DEPLOY_SUDO_PASSWORD" | sudo -S rm -rf /var/www/html/*
-            echo "$DEPLOY_SUDO_PASSWORD" | sudo -S cp -r $GITHUB_WORKSPACE/portal-artifact/* /var/www/html/
-            echo "$DEPLOY_SUDO_PASSWORD" | sudo -S cp -r $GITHUB_WORKSPACE/api-artifact/* /var/www/kwestkarz-api/
-            echo "$DEPLOY_SUDO_PASSWORD" | sudo -S systemctl start kwestkarz.service
+            echo "${{ secrets.DEPLOY_SUDO_PASSWORD }}" | sudo -S rm -rf /var/www/html/*
+            echo "${{ secrets.DEPLOY_SUDO_PASSWORD }}" | sudo -S cp -r $GITHUB_WORKSPACE/portal-artifact/* /var/www/html/
+            echo "${{ secrets.DEPLOY_SUDO_PASSWORD }}" | sudo -S cp -r $GITHUB_WORKSPACE/api-artifact/* /var/www/kwestkarz-api/
+            echo "${{ secrets.DEPLOY_SUDO_PASSWORD }}" | sudo -S systemctl start kwestkarz.service
         env:
           DEPLOY_SUDO_PASSWORD: ${{ secrets.DEPLOY_SUDO_PASSWORD }}
