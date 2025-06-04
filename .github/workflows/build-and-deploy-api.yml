@@ -79,7 +79,7 @@ jobs:
           key: ${{ secrets.DROPLET_SSH_KEY }}
           passphrase: ${{ secrets.DROPLET_SSH_PASSPHRASE }}
           port: 22
-          source: "portal-artifact/**"
+          source: "portal-artifact/*"
           target: "/var/www/html"
       
       - name: Copy API files to server
