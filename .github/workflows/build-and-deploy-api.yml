@@ -31,7 +31,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: api-source
-          path: ./KwestKarz
+          path: ./Kwestkarz-API
 
   deploy:
     needs: build
@@ -82,7 +82,7 @@ jobs:
           username: ${{ secrets.DROPLET_USER }}
           key: ${{ secrets.DROPLET_SSH_KEY }}
           passphrase: ${{ secrets.DROPLET_SSH_PASSPHRASE }}
-          google_email_addr: ${{ secrets.GOOGLE_EMAIL_ADDR }}  
+          google_email_addr: ${{ secrets.GOOGLE_EMAIL_ADDR }}
           google_smtp_password: ${{ secrets.GOOGLE_SMTP_PASSWORD }}
           port: 22
           script: |
@@ -97,7 +97,7 @@ jobs:
             export ConnectionStrings__KwestKarzDb="Host=localhost;Database=kwestkarz;Username=kwestkarz_user;Password=htrv6gpl1234!@#$"
             export google__email="${{ secrets.GOOGLE_EMAIL_ADDR }}"
             export google__password="${{ secrets.GOOGLE_SMTP_PASSWORD }}"
-            cd /home/${{ secrets.DROPLET_USER }}/kwestkarz-src/api-source
+            cd /home/${{ secrets.DROPLET_USER }}/kwestkarz-src/Kwestkarz-API/KwestKarz
             ~/.dotnet/tools/dotnet-ef database update --project KwestKarz.csproj
             echo "Cleaning up source..."
             # rm -rf /home/${{ secrets.DROPLET_USER }}/kwestkarz-src
