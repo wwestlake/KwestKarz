@@ -1,4 +1,4 @@
-name: Build and Deploy App & API
+name: Build and Deploy Full Stack
 
 on:
   push:
@@ -19,9 +19,9 @@ jobs:
           dotnet-version: 8.0.x
 
       - name: Build and publish API
-        run: dotnet publish ./KwestKarz-API/KwestKarz/KwestKarz.csproj -c Release -o ./publish-api
+        run: dotnet publish ./Kwestkarz-API/KwestKarz/KwestKarz.csproj -c Release -o ./publish-api
 
-      - name: Upload API artifact
+      - name: Upload API artifacts
         uses: actions/upload-artifact@v4
         with:
           name: api-artifact
@@ -31,23 +31,23 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: api-source
-          path: ./KwestKarz-API
+          path: ./Kwestkarz-API
 
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
           node-version: 20
 
-      - name: Build React frontend
+      - name: Install dependencies & build frontend
+        working-directory: ./KwestKarz-Portal
         run: |
-          cd KwestKarz-Portal
-          npm ci
+          npm install
           npm run build
 
-      - name: Upload frontend artifact
+      - name: Upload frontend artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: frontend-artifact
+          name: portal-artifact
           path: ./KwestKarz-Portal/dist
 
   deploy:
@@ -55,7 +55,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Download API artifact
+      - name: Download API artifacts
         uses: actions/download-artifact@v4
         with:
           name: api-artifact
@@ -67,13 +67,13 @@ jobs:
           name: api-source
           path: ./api-source
 
-      - name: Download frontend artifact
+      - name: Download frontend artifacts
         uses: actions/download-artifact@v4
         with:
-          name: frontend-artifact
-          path: ./frontend-artifact
+          name: portal-artifact
+          path: ./portal-artifact
 
-      - name: Upload API artifact to Droplet
+      - name: Upload API to Droplet
         uses: appleboy/scp-action@v0.1.4
         with:
           host: ${{ secrets.DROPLET_HOST }}
@@ -95,7 +95,7 @@ jobs:
           source: "./api-source/*"
           target: "/home/${{ secrets.DROPLET_USER }}/kwestkarz-src/"
 
-      - name: Upload frontend dist to NGINX root
+      - name: Upload frontend to Droplet
         uses: appleboy/scp-action@v0.1.4
         with:
           host: ${{ secrets.DROPLET_HOST }}
@@ -103,12 +103,11 @@ jobs:
           key: ${{ secrets.DROPLET_SSH_KEY }}
           passphrase: ${{ secrets.DROPLET_SSH_PASSPHRASE }}
           port: 22
-          source: "./frontend-artifact/*"
+          source: "./portal-artifact/*"
           target: "/var/www/html/"
 
-      - name: Run migration and restart API service
+      - name: Run migration and restart API
         uses: appleboy/ssh-action@v0.1.7
-        envs: DEPLOY_SUDO_PASSWORD,GOOGLE_EMAIL_ADDR,GOOGLE_SMTP_PASSWORD
         with:
           host: ${{ secrets.DROPLET_HOST }}
           username: ${{ secrets.DROPLET_USER }}
@@ -116,18 +115,14 @@ jobs:
           passphrase: ${{ secrets.DROPLET_SSH_PASSPHRASE }}
           port: 22
           script: |
-            echo "Stopping service..."
-            echo "$DEPLOY_SUDO_PASSWORD" | sudo -S systemctl stop kwestkarz.service || true
-            echo "Installing dotnet-ef locally..."
+            echo "${{ secrets.DEPLOY_SUDO_PASSWORD }}" | sudo -S systemctl stop kwestkarz.service || true
             export DOTNET_ROOT=~/.dotnet
             export PATH=$PATH:$DOTNET_ROOT:$DOTNET_ROOT/tools:~/.dotnet/tools
             mkdir -p ~/.dotnet/tools
             dotnet tool install dotnet-ef --tool-path ~/.dotnet/tools || true
-            echo "Running migration..."
             export ConnectionStrings__KwestKarzDb="Host=localhost;Database=kwestkarz;Username=kwestkarz_user;Password=htrv6gpl1234!@#$"
-            export google__email="${GOOGLE_EMAIL_ADDR}"
-            export google__password="${GOOGLE_SMTP_PASSWORD}"
+            export google__email="${{ secrets.GOOGLE_EMAIL_ADDR }}"
+            export google__password="${{ secrets.GOOGLE_SMTP_PASSWORD }}"
             cd /home/${{ secrets.DROPLET_USER }}/kwestkarz-src/KwestKarz/KwestKarz
             ~/.dotnet/tools/dotnet-ef database update --project KwestKarz.csproj
-            echo "Starting service..."
-            echo "$DEPLOY_SUDO_PASSWORD" | sudo -S systemctl start kwestkarz.service
+            echo "${{ secrets.DEPLOY_SUDO_PASSWORD }}" | sudo -S systemctl start kwestkarz.service
