@@ -1,4 +1,4 @@
-name: Build and Deploy App and API
+name: Build and Deploy App & API
 
 on:
   push:
@@ -21,30 +21,30 @@ jobs:
       - name: Build and publish API
         run: dotnet publish ./Kwestkarz-API/KwestKarz/KwestKarz.csproj -c Release -o ./publish
 
-      - name: Upload API artifact
+      - name: Upload API build artifacts
         uses: actions/upload-artifact@v4
         with:
           name: api-artifact
           path: ./publish
 
-      - name: Upload API source
+      - name: Upload API source code
         uses: actions/upload-artifact@v4
         with:
           name: api-source
           path: ./Kwestkarz-API
 
-      - name: Setup Node.js
+      - name: Setup Node
         uses: actions/setup-node@v4
         with:
           node-version: 20
 
-      - name: Install dependencies and build React app
-        working-directory: ./KwestKarz-Portal
-        run: |
-          npm ci
-          npm run build
+      - name: Install frontend dependencies
+        run: cd KwestKarz-Portal && npm ci
 
-      - name: Upload React artifact
+      - name: Build frontend
+        run: cd KwestKarz-Portal && npm run build
+
+      - name: Upload frontend artifacts
         uses: actions/upload-artifact@v4
         with:
           name: portal-artifact
@@ -56,7 +56,7 @@ jobs:
     if: github.event_name == 'push'
 
     steps:
-      - name: Download API artifact
+      - name: Download API artifacts
         uses: actions/download-artifact@v4
         with:
           name: api-artifact
@@ -68,13 +68,13 @@ jobs:
           name: api-source
           path: ./api-source
 
-      - name: Download Portal artifact
+      - name: Download frontend
         uses: actions/download-artifact@v4
         with:
           name: portal-artifact
           path: ./portal-artifact
 
-      - name: Upload API build to Droplet
+      - name: Upload API to Droplet
         uses: appleboy/scp-action@v0.1.4
         with:
           host: ${{ secrets.DROPLET_HOST }}
@@ -85,7 +85,7 @@ jobs:
           source: "./api-artifact/*"
           target: "/home/${{ secrets.DROPLET_USER }}/kwestkarz-app/"
 
-      - name: Upload API source to Droplet
+      - name: Upload API Source
         uses: appleboy/scp-action@v0.1.4
         with:
           host: ${{ secrets.DROPLET_HOST }}
@@ -96,7 +96,7 @@ jobs:
           source: "./api-source/*"
           target: "/home/${{ secrets.DROPLET_USER }}/kwestkarz-src/"
 
-      - name: Upload Portal to web root
+      - name: Upload frontend to Droplet
         uses: appleboy/scp-action@v0.1.4
         with:
           host: ${{ secrets.DROPLET_HOST }}
@@ -107,7 +107,7 @@ jobs:
           source: "./portal-artifact/*"
           target: "/var/www/html/"
 
-      - name: Run migration and restart API
+      - name: SSH Run migration and restart API
         uses: appleboy/ssh-action@v0.1.7
         with:
           host: ${{ secrets.DROPLET_HOST }}
@@ -125,6 +125,6 @@ jobs:
             export ConnectionStrings__KwestKarzDb="Host=localhost;Database=kwestkarz;Username=kwestkarz_user;Password=htrv6gpl1234!@#$"
             export google__email="${{ secrets.GOOGLE_EMAIL_ADDR }}"
             export google__password="${{ secrets.GOOGLE_SMTP_PASSWORD }}"
-            cd /home/${{ secrets.DROPLET_USER }}/kwestkarz-src/Kwestkarz-API/KwestKarz
+            cd /home/${{ secrets.DROPLET_USER }}/kwestkarz-src/api-source/KwestKarz
             ~/.dotnet/tools/dotnet-ef database update --project KwestKarz.csproj
             echo "$DEPLOY_SUDO_PASSWORD" | sudo -S systemctl start kwestkarz.service
