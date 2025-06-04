@@ -103,6 +103,7 @@ jobs:
           key: ${{ secrets.DROPLET_SSH_KEY }}
           passphrase: ${{ secrets.DROPLET_SSH_PASSPHRASE }}
           port: 22
+          pty: true
           script: |
             echo "$DEPLOY_SUDO_PASSWORD" | sudo -S systemctl stop kwestkarz.service || true
             echo "$DEPLOY_SUDO_PASSWORD" | sudo -S rm -rf /var/www/html/*
