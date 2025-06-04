@@ -71,6 +71,7 @@ jobs:
           host: ${{ secrets.SSH_HOST }}
           username: ${{ secrets.SSH_USER }}
           key: ${{ secrets.SSH_KEY }}
+          passphrase: ${{ secrets.DROPLET_SSH_PASSPHRASE }}
           port: 22
           script: |
             echo "$DEPLOY_SUDO_PASSWORD" | sudo -S systemctl stop kwestkarz.service || true
