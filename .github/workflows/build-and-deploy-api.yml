@@ -81,7 +81,7 @@ jobs:
           port: 22
           source: "portal-artifact/**"
           target: "/var/www/html"
-
+      
       - name: Copy API files to server
         uses: appleboy/scp-action@v0.1.5
         with:
@@ -91,8 +91,8 @@ jobs:
           passphrase: ${{ secrets.DROPLET_SSH_PASSPHRASE }}
           port: 22
           source: "api-artifact/**"
-          target: "/var/www/kwestkarz-api"
-
+          target: "/var/www/html"
+      
       - name: Deploy to server via SSH
         uses: appleboy/ssh-action@v0.1.7
         with:
