@@ -73,20 +73,19 @@ jobs:
           key: ${{ secrets.DROPLET_SSH_KEY }}
           passphrase: ${{ secrets.DROPLET_SSH_PASSPHRASE }}
           port: 22
-          envs: DEPLOY_SUDO_PASSWORD,GOOGLE_EMAIL_ADDR,GOOGLE_SMTP_PASSWORD,CONNECTION_STRING
+          envs: DEPLOY_SUDO_PASSWORD
           script: |
             echo "$DEPLOY_SUDO_PASSWORD" | sudo -S systemctl stop kwestkarz.service || true
             export DOTNET_ROOT=~/.dotnet
             export PATH=$PATH:$DOTNET_ROOT:$DOTNET_ROOT/tools:~/.dotnet/tools
             mkdir -p ~/.dotnet/tools
             dotnet tool install dotnet-ef --tool-path ~/.dotnet/tools || true
-            export ConnectionStrings__KwestKarzDb="$CONNECTION_STRING"
-            export google__email="$GOOGLE_EMAIL_ADDR"
-            export google__password="$GOOGLE_SMTP_PASSWORD"
+            export ConnectionStrings__KwestKarzDb="${{ secrets.CONNECTION_STRING }}"
+            export google__email="${{ secrets.GOOGLE_EMAIL_ADDR }}"
+            export google__password="${{ secrets.GOOGLE_SMTP_PASSWORD }}"
             cd /home/${{ secrets.DROPLET_USER }}/kwestkarz-src/Kwestkarz-API/KwestKarz
             ~/.dotnet/tools/dotnet-ef database update --project KwestKarz.csproj
             echo "$DEPLOY_SUDO_PASSWORD" | sudo -S rm -rf /var/www/html/*
             echo "$DEPLOY_SUDO_PASSWORD" | sudo -S cp -r $GITHUB_WORKSPACE/portal-artifact/* /var/www/html/
             echo "$DEPLOY_SUDO_PASSWORD" | sudo -S cp -r $GITHUB_WORKSPACE/api-artifact/* /var/www/kwestkarz-api/
             echo "$DEPLOY_SUDO_PASSWORD" | sudo -S systemctl start kwestkarz.service
-  
