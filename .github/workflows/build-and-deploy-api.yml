@@ -93,8 +93,10 @@ jobs:
           source: "api-artifact/**"
           target: "/var/www/html"
       
-      - name: Deploy to server via SSH ${{ secrets.DEPLOY_SUDO_PASSWORD }}
+      - name: Deploy to server via SSH 
         uses: appleboy/ssh-action@v0.1.7
+        env:
+          DEPLOY_SUDO_PASSWORD: ${{ secrets.DEPLOY_SUDO_PASSWORD }}
         with:
           host: ${{ secrets.DROPLET_HOST }}
           username: ${{ secrets.DROPLET_USER }}
@@ -113,6 +115,4 @@ jobs:
             export google__password="${{ secrets.GOOGLE_SMTP_PASSWORD }}"
             cd /home/${{ secrets.DROPLET_USER }}/kwestkarz-src/api-source
             ~/.dotnet/tools/dotnet-ef database update --project KwestKarz.csproj
-            echo "${{ secrets.DEPLOY_SUDO_PASSWORD }}" | sudo -S systemctl start kwestkarz.service
-        env:
-          DEPLOY_SUDO_PASSWORD: ${{ secrets.DEPLOY_SUDO_PASSWORD }}
+            echo "$DEPLOY_SUDO_PASSWORD" | sudo -S systemctl start kwestkarz.service
