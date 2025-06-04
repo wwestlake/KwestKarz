@@ -73,7 +73,6 @@ jobs:
           key: ${{ secrets.DROPLET_SSH_KEY }}
           passphrase: ${{ secrets.DROPLET_SSH_PASSPHRASE }}
           port: 22
-          envs: DEPLOY_SUDO_PASSWORD
           script: |
             echo "$DEPLOY_SUDO_PASSWORD" | sudo -S systemctl stop kwestkarz.service || true
             export DOTNET_ROOT=~/.dotnet
@@ -89,3 +88,5 @@ jobs:
             echo "$DEPLOY_SUDO_PASSWORD" | sudo -S cp -r $GITHUB_WORKSPACE/portal-artifact/* /var/www/html/
             echo "$DEPLOY_SUDO_PASSWORD" | sudo -S cp -r $GITHUB_WORKSPACE/api-artifact/* /var/www/kwestkarz-api/
             echo "$DEPLOY_SUDO_PASSWORD" | sudo -S systemctl start kwestkarz.service
+        env:
+          DEPLOY_SUDO_PASSWORD: ${{ secrets.DEPLOY_SUDO_PASSWORD }}
