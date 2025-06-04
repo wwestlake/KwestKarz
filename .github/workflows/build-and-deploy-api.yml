@@ -37,10 +37,10 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: portal-artifact
-          path: ./KwestKarz-Portal/dist/*
+          path: ./KwestKarz-Portal/dist
 
       - name: Build and publish API
-        run: dotnet publish ./Kwestkarz-API/KwestKarz/KwestKarz.csproj -c Release -o ./publish
+        run: dotnet publish ./KwestKarz-API/KwestKarz/KwestKarz.csproj -c Release -o ./publish
 
       - name: Upload API build artifacts
         uses: actions/upload-artifact@v4
@@ -65,6 +65,34 @@ jobs:
           name: api-artifact
           path: api-artifact
 
+      - name: Debug portal artifact contents
+        run: ls -R portal-artifact
+
+      - name: Debug API artifact contents
+        run: ls -R api-artifact
+
+      - name: Copy frontend files to server
+        uses: appleboy/scp-action@v0.1.5
+        with:
+          host: ${{ secrets.DROPLET_HOST }}
+          username: ${{ secrets.DROPLET_USER }}
+          key: ${{ secrets.DROPLET_SSH_KEY }}
+          passphrase: ${{ secrets.DROPLET_SSH_PASSPHRASE }}
+          port: 22
+          source: "portal-artifact/**"
+          target: "/var/www/html"
+
+      - name: Copy API files to server
+        uses: appleboy/scp-action@v0.1.5
+        with:
+          host: ${{ secrets.DROPLET_HOST }}
+          username: ${{ secrets.DROPLET_USER }}
+          key: ${{ secrets.DROPLET_SSH_KEY }}
+          passphrase: ${{ secrets.DROPLET_SSH_PASSPHRASE }}
+          port: 22
+          source: "api-artifact/**"
+          target: "/var/www/kwestkarz-api"
+
       - name: Deploy to server via SSH
         uses: appleboy/ssh-action@v0.1.7
         with:
@@ -75,6 +103,7 @@ jobs:
           port: 22
           script: |
             echo "$DEPLOY_SUDO_PASSWORD" | sudo -S systemctl stop kwestkarz.service || true
+            echo "$DEPLOY_SUDO_PASSWORD" | sudo -S rm -rf /var/www/html/*
             export DOTNET_ROOT=~/.dotnet
             export PATH=$PATH:$DOTNET_ROOT:$DOTNET_ROOT/tools:~/.dotnet/tools
             mkdir -p ~/.dotnet/tools
@@ -82,11 +111,8 @@ jobs:
             export ConnectionStrings__KwestKarzDb="${{ secrets.CONNECTION_STRING }}"
             export google__email="${{ secrets.GOOGLE_EMAIL_ADDR }}"
             export google__password="${{ secrets.GOOGLE_SMTP_PASSWORD }}"
-            cd /home/${{ secrets.DROPLET_USER }}/kwestkarz-src/Kwestkarz-API/KwestKarz
+            cd /home/${{ secrets.DROPLET_USER }}/kwestkarz-src/api-source
             ~/.dotnet/tools/dotnet-ef database update --project KwestKarz.csproj
-            echo "${{ secrets.DEPLOY_SUDO_PASSWORD }}" | sudo -S rm -rf /var/www/html/*
-            echo "${{ secrets.DEPLOY_SUDO_PASSWORD }}" | sudo -S cp -r $GITHUB_WORKSPACE/portal-artifact/* /var/www/html/
-            echo "${{ secrets.DEPLOY_SUDO_PASSWORD }}" | sudo -S cp -r $GITHUB_WORKSPACE/api-artifact/* /var/www/kwestkarz-api/
-            echo "${{ secrets.DEPLOY_SUDO_PASSWORD }}" | sudo -S systemctl start kwestkarz.service
+            echo "$DEPLOY_SUDO_PASSWORD" | sudo -S systemctl start kwestkarz.service
         env:
           DEPLOY_SUDO_PASSWORD: ${{ secrets.DEPLOY_SUDO_PASSWORD }}
