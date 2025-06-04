@@ -83,6 +83,8 @@ jobs:
             export google__password="${{ secrets.GOOGLE_PASSWORD }}"
             cd /home/${{ secrets.SSH_USER }}/kwestkarz-src/Kwestkarz-API/KwestKarz
             ~/.dotnet/tools/dotnet-ef database update --project KwestKarz.csproj
-            echo "$DEPLOY_SUDO_PASSWORD" | sudo -S cp -r ~/portal-artifact/* /var/www/html/
-            echo "$DEPLOY_SUDO_PASSWORD" | sudo -S cp -r ~/api-artifact/* /var/www/kwestkarz-api/
+            sudo rm -rf /var/www/html/*
+            sudo cp -r $GITHUB_WORKSPACE/portal-artifact/* /var/www/html/
+            sudo cp -r $GITHUB_WORKSPACE/api-artifact/* /var/www/kwestkarz-api/
             echo "$DEPLOY_SUDO_PASSWORD" | sudo -S systemctl start kwestkarz.service
+        
