@@ -131,6 +131,6 @@ jobs:
             export ConnectionStrings__KwestKarzDb="Host=localhost;Database=kwestkarz;Username=kwestkarz_user;Password=htrv6gpl1234!@#$"
             export google__email="${{ secrets.GOOGLE_EMAIL_ADDR }}"
             export google__password="${{ secrets.GOOGLE_SMTP_PASSWORD }}"
-            cd /home/${{ secrets.DROPLET_USER }}/kwestkarz-src/Kwestkarz-API/KwestKarz
+            cd /home/${{ secrets.DROPLET_USER }}/kwestkarz-src/api-source/KwestKarz
             ~/.dotnet/tools/dotnet-ef database update --project KwestKarz.csproj
             echo "$DEPLOY_SUDO_PASSWORD" | sudo -S systemctl start kwestkarz.service
