@@ -1,4 +1,4 @@
-name: Build and Deploy API
+name: Build and Deploy API and UI
 
 on:
   push:
@@ -19,19 +19,19 @@ jobs:
           dotnet-version: 8.0.x
 
       - name: Build and publish API
-        run: dotnet publish ./Kwestkarz-API/KwestKarz/KwestKarz.csproj -c Release -o ./publish
+        run: dotnet publish ./KwestKarz-API/KwestKarz/KwestKarz.csproj -c Release -o ./publish
 
-      - name: Upload build artifacts
+      - name: Upload API build artifacts
         uses: actions/upload-artifact@v4
         with:
           name: api-artifact
           path: ./publish
 
-      - name: Upload source code
+      - name: Upload API source code
         uses: actions/upload-artifact@v4
         with:
           name: api-source
-          path: ./Kwestkarz-API
+          path: ./KwestKarz-API
 
   deploy:
     needs: build
@@ -39,19 +39,19 @@ jobs:
     if: github.event_name == 'push'
 
     steps:
-      - name: Download build artifacts
+      - name: Download API build artifacts
         uses: actions/download-artifact@v4
         with:
           name: api-artifact
           path: ./api-artifact
 
-      - name: Download source code
+      - name: Download API source code
         uses: actions/download-artifact@v4
         with:
           name: api-source
           path: ./api-source
 
-      - name: Upload build artifacts to Droplet
+      - name: Upload API build to Droplet
         uses: appleboy/scp-action@v0.1.4
         with:
           host: ${{ secrets.DROPLET_HOST }}
@@ -62,7 +62,7 @@ jobs:
           source: "./api-artifact/*"
           target: "/home/${{ secrets.DROPLET_USER }}/kwestkarz-app/"
 
-      - name: Upload source code to Droplet
+      - name: Upload API source to Droplet
         uses: appleboy/scp-action@v0.1.4
         with:
           host: ${{ secrets.DROPLET_HOST }}
@@ -73,17 +73,14 @@ jobs:
           source: "./api-source/*"
           target: "/home/${{ secrets.DROPLET_USER }}/kwestkarz-src/"
 
-      - name: Run schema migration and start service
+      - name: Run migration and restart API service
         uses: appleboy/ssh-action@v0.1.7
-        env:
-          DEPLOY_SUDO_PASSWORD: ${{ secrets.DEPLOY_SUDO_PASSWORD }}
+        envs: GOOGLE_EMAIL_ADDR,GOOGLE_SMTP_PASSWORD,DEPLOY_SUDO_PASSWORD
         with:
           host: ${{ secrets.DROPLET_HOST }}
           username: ${{ secrets.DROPLET_USER }}
           key: ${{ secrets.DROPLET_SSH_KEY }}
           passphrase: ${{ secrets.DROPLET_SSH_PASSPHRASE }}
-          google_email_addr: ${{ secrets.GOOGLE_EMAIL_ADDR }}
-          google_smtp_password: ${{ secrets.GOOGLE_SMTP_PASSWORD }}
           port: 22
           script: |
             echo "Stopping service..."
@@ -95,11 +92,9 @@ jobs:
             dotnet tool install dotnet-ef --tool-path ~/.dotnet/tools || true
             echo "Running migration..."
             export ConnectionStrings__KwestKarzDb="Host=localhost;Database=kwestkarz;Username=kwestkarz_user;Password=htrv6gpl1234!@#$"
-            export google__email="${{ secrets.GOOGLE_EMAIL_ADDR }}"
-            export google__password="${{ secrets.GOOGLE_SMTP_PASSWORD }}"
-            cd /home/${{ secrets.DROPLET_USER }}/kwestkarz-src/Kwestkarz-API/KwestKarz
+            export google__email="$GOOGLE_EMAIL_ADDR"
+            export google__password="$GOOGLE_SMTP_PASSWORD"
+            cd /home/${{ secrets.DROPLET_USER }}/kwestkarz-src/KwestKarz/KwestKarz
             ~/.dotnet/tools/dotnet-ef database update --project KwestKarz.csproj
-            echo "Cleaning up source..."
-            # rm -rf /home/${{ secrets.DROPLET_USER }}/kwestkarz-src
             echo "Starting service..."
             echo "$DEPLOY_SUDO_PASSWORD" | sudo -S systemctl start kwestkarz.service
