@@ -103,7 +103,6 @@ jobs:
           key: ${{ secrets.DROPLET_SSH_KEY }}
           passphrase: ${{ secrets.DROPLET_SSH_PASSPHRASE }}
           port: 22
-          pty: true
           script: |
             echo "$DEPLOY_SUDO_PASSWORD" | sudo -S systemctl stop kwestkarz.service || true
             echo "$DEPLOY_SUDO_PASSWORD" | sudo -S rm -rf /var/www/html/*
@@ -116,4 +115,4 @@ jobs:
             export google__password="${{ secrets.GOOGLE_SMTP_PASSWORD }}"
             cd /home/${{ secrets.DROPLET_USER }}/kwestkarz-src/api-source
             ~/.dotnet/tools/dotnet-ef database update --project KwestKarz.csproj
-            echo "$DEPLOY_SUDO_PASSWORD" | sudo -S systemctl start kwestkarz.service
+            echo "${{ secrets.DEPLOY_SUDO_PASSWORD }}" | sudo -S systemctl start kwestkarz.service
