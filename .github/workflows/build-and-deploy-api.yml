@@ -104,8 +104,8 @@ jobs:
           passphrase: ${{ secrets.DROPLET_SSH_PASSPHRASE }}
           port: 22
           script: |
-            echo "$DEPLOY_SUDO_PASSWORD" | sudo -S systemctl stop kwestkarz.service || true
-            echo "$DEPLOY_SUDO_PASSWORD" | sudo -S rm -rf /var/www/html/*
+            echo "${{ secrets.DEPLOY_SUDO_PASSWORD }}" | sudo -S systemctl stop kwestkarz.service || true
+            echo "${{ secrets.DEPLOY_SUDO_PASSWORD }}" | sudo -S rm -rf /var/www/html/*
             export DOTNET_ROOT=~/.dotnet
             export PATH=$PATH:$DOTNET_ROOT:$DOTNET_ROOT/tools:~/.dotnet/tools
             mkdir -p ~/.dotnet/tools
