@@ -30,9 +30,11 @@ jobs:
       - name: Build frontend
         working-directory: ./KwestKarz-Portal
         run: |
-          echo "VITE_API_BASE_URL=https://kwestkarz.lagdaemon.com/api" > .env
+          npm ci
           npm run build
-
+        env:
+          VITE_API_BASE_URL: https://kwestkarz.lagdaemon.com/api
+      
       - name: Upload frontend artifacts
         uses: actions/upload-artifact@v4
         with:

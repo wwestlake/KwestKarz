@@ -1,0 +1,22 @@
+function combine-files {
+    param (
+        [string]$RootPath = ".",
+        [string]$OutputFile = "combined_output.txt"
+    )
+
+    $absoluteRoot = Resolve-Path $RootPath
+    $csFiles = Get-ChildItem -Path $absoluteRoot -Recurse -Filter *.cs -File
+
+    if (Test-Path $OutputFile) {
+        Remove-Item $OutputFile
+    }
+
+    foreach ($file in $csFiles) {
+        $absolutePath = $file.FullName
+        Add-Content -Path $OutputFile -Value "// $absolutePath"
+        Get-Content -Path $absolutePath | Add-Content -Path $OutputFile
+        Add-Content -Path $OutputFile -Value "`n"
+    }
+
+    Write-Host "Combined all .cs files from $absoluteRoot into $OutputFile"
+}
