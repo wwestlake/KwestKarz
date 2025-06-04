@@ -40,7 +40,7 @@ jobs:
           path: ./KwestKarz-Portal/dist
 
       - name: Build and publish API
-        run: dotnet publish ./kwestkarz-src/api-source/KwestKarz/KwestKarz.csproj -c Release -o ./publish
+        run: dotnet publish ./api-source/KwestKarz/KwestKarz.csproj -c Release -o ./publish
 
       - name: Upload API build artifacts
         uses: actions/upload-artifact@v4
