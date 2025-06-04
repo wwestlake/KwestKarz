@@ -91,7 +91,7 @@ jobs:
           passphrase: ${{ secrets.DROPLET_SSH_PASSPHRASE }}
           port: 22
           source: "api-artifact/**"
-          target: "/var/www/html"
+          target: "/home/${{ secrets.DROPLET_USER }}/kwestkarz-src/api-source"
       
       - name: Deploy to server via SSH 
         uses: appleboy/ssh-action@v0.1.7
@@ -105,7 +105,6 @@ jobs:
           port: 22
           script: |
             echo "${{ secrets.DEPLOY_SUDO_PASSWORD }}" | sudo -S systemctl stop kwestkarz.service || true
-            echo "${{ secrets.DEPLOY_SUDO_PASSWORD }}" | sudo -S rm -rf /var/www/html/*
             export DOTNET_ROOT=~/.dotnet
             export PATH=$PATH:$DOTNET_ROOT:$DOTNET_ROOT/tools:~/.dotnet/tools
             mkdir -p ~/.dotnet/tools
