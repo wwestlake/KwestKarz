@@ -16,7 +16,11 @@ export default function ChangePassword() {
     }
 
     try {
-      await changePassword(form.currentPassword, form.newPassword);
+        await changePassword({
+            currentPassword: form.currentPassword,
+            newPassword: form.newPassword
+          });
+          
       setStatus("Password changed successfully.");
       setForm({ currentPassword: "", newPassword: "", confirmPassword: "" });
     } catch (err) {
