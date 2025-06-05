@@ -31,7 +31,7 @@ export default function InviteUser() {
         value={email}
         onChange={(e) => setEmail(e.target.value)}
         placeholder="user@example.com"
-        className="w-full mb-2 p-2 border rounded"
+        className="w-full mb-2 p-2 border rounded bg-white text-black"
       />
       <button type="submit" className="bg-accent text-white px-4 py-2 rounded">
         Send Invite
