@@ -1,6 +1,5 @@
-// pages/InviteUser.jsx
 import { useState } from "react";
-import config from "../config";
+import { inviteUser } from "../services/userService";
 
 export default function InviteUser() {
   const [email, setEmail] = useState("");
@@ -9,15 +8,12 @@ export default function InviteUser() {
   async function handleInvite(e) {
     e.preventDefault();
     setStatus("");
-    const res = await fetch(`${config.apiBaseUrl}/api/UserAccounts/invite`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ email })
-    });
-    if (res.ok) {
+
+    try {
+      await inviteUser(email);
       setStatus("Invite sent!");
       setEmail("");
-    } else {
+    } catch (err) {
       setStatus("Error sending invite.");
     }
   }

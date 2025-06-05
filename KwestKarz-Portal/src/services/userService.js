@@ -68,3 +68,15 @@ export async function enableUser(id) {
   });
   if (!res.ok) throw new Error('Failed to enable user');
 }
+
+export async function inviteUser(email) {
+  const res = await fetch(`${baseUrl}/invite`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      ...authHeader(),
+    },
+    body: JSON.stringify({ email }),
+  });
+  if (!res.ok) throw new Error('Failed to send invite');
+}

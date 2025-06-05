@@ -13,6 +13,7 @@ import { clearToken } from "./services/sessionService";
 import UserManagement from "./pages/UserManagement";
 import InviteUser from "./pages/InviteUser";
 import CompleteAccountSetup from "./pages/CompleteAccountSetup";
+import ChangePassword from "./pages/ChangePassword";
 
 function App() {
   return (
@@ -30,6 +31,7 @@ function App() {
           <Route path="/dashboard/users/invite" element={<InviteUser />} />
           {/* Add more dashboard routes as needed */}
           <Route path="/setup-account" element={<CompleteAccountSetup />} />
+          <Route path="/change-password" element={<ChangePassword />} />
           <Route path="/logout" element={
                 (() => {
                   clearToken();
