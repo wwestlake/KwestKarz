@@ -8,6 +8,11 @@ const menuItems = [
   { label: "Customer Relations", path: "/crm" },
   { label: "Settings", path: "/settings" },
   { label: "System Administration", path: "/admin" },
+  { label: "User Management", path: "/dashboard/users" },
+  { label: "Reports", path: "/reports" },
+  { label: "Analytics", path: "/analytics" },
+  { label: "Notifications", path: "/notifications" },
+  { label: "Help & Support", path: "/help" },
   { label: "Log Out", path: "/logout" }
 ];
 

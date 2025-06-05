@@ -1,4 +1,7 @@
 import { NavLink } from "react-router-dom";
+import UserMenu from "./UserMenu";
+import { isLoggedIn, onAuthChange } from "../services/sessionService";
+import { useState, useEffect } from "react";
 
 const navLinkClass = ({ isActive }) =>
   `px-3 py-2 rounded-md text-sm font-medium ${
@@ -6,6 +9,15 @@ const navLinkClass = ({ isActive }) =>
   }`;
 
 export default function Header() {
+  console.log("Header rendered. isLoggedIn:", isLoggedIn());
+  const [loggedIn, setLoggedIn] = useState(isLoggedIn());
+
+  useEffect(() => {
+    setLoggedIn(isLoggedIn());
+    const unsubscribe = onAuthChange(() => setLoggedIn(isLoggedIn()));
+    return unsubscribe;
+  }, []);
+
   return (
     <header className="bg-primary shadow">
       <div className="max-w-7xl mx-auto px-4 py-3 flex justify-between items-center">
@@ -16,7 +28,7 @@ export default function Header() {
           <NavLink to="/turo" className={navLinkClass}>Turo</NavLink>
           <NavLink to="/help" className={navLinkClass}>Help</NavLink>
           <NavLink to="/contact" className={navLinkClass}>Contact</NavLink>
-          <NavLink to="/login" className={navLinkClass}>Login</NavLink>
+          {loggedIn ? <UserMenu /> : <NavLink to="/login" className={navLinkClass}>Login</NavLink>}
         </nav>
       </div>
     </header>

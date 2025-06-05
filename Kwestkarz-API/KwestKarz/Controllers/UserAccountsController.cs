@@ -17,6 +17,14 @@ namespace KwestKarz.Controllers
             _accountService = accountService;
         }
 
+        [HttpGet]
+        [Authorize(Roles = "Admin")]
+        public async Task<ActionResult<List<UserAccount>>> GetAll()
+        {
+            var users = await _accountService.GetAllAccounts();
+            return Ok(users);
+        }
+
 
         [HttpGet("{id}")]
         [Authorize(Roles = "Admin")]

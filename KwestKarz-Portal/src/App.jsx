@@ -10,7 +10,7 @@ import Login from "./pages/Login";
 import DashboardLayout from "./components/DashboardLayout";
 import { Navigate } from "react-router-dom";
 import { clearToken } from "./services/sessionService";
-
+import UserManagement from "./pages/UserManagement";
 
 
 function App() {
@@ -25,6 +25,8 @@ function App() {
           <Route path="/contact" element={<Contact />} />
           <Route path="/login" element={<Login />} />
           <Route path="/dashboard" element={<DashboardLayout />} />
+          <Route path="/dashboard/users" element={<UserManagement />} />
+
           <Route path="/logout" element={
                 (() => {
                   clearToken();

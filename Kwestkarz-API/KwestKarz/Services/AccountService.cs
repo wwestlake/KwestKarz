@@ -15,6 +15,11 @@ namespace KwestKarz.Services
             _dbContext = dbContext;
         }
 
+        public async Task<List<UserAccount>> GetAllAccounts()
+        {
+            return await _dbContext.UserAccounts.ToListAsync();    
+        }
+
         public async Task<UserAccount> CreateAccountAsync(string email, string username, string password)
         {
             var existing = await _dbContext.UserAccounts.FirstOrDefaultAsync(u => u.Email == email);
