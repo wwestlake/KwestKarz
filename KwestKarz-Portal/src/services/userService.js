@@ -80,3 +80,17 @@ export async function inviteUser(email) {
   });
   if (!res.ok) throw new Error('Failed to send invite');
 }
+
+export async function changePassword(data) {
+    const res = await fetch(`${config.apiBaseUrl}/api/Auth/change-password`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        ...authHeader(),
+      },
+      body: JSON.stringify(data),
+    });
+  
+    if (!res.ok) throw new Error('Failed to change password');
+  }
+  
