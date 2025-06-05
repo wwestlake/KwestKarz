@@ -4,6 +4,7 @@ using KwestKarz.Services;
 using System;
 using System.Threading.Tasks;
 using Microsoft.IdentityModel.Tokens;
+using System.Security.Claims;
 
 namespace KwestKarz.Controllers
 {
@@ -60,7 +61,8 @@ namespace KwestKarz.Controllers
         [Authorize]
         public async Task<IActionResult> ChangePassword([FromBody] ChangePasswordRequest request)
         {
-            var email = User.Claims.FirstOrDefault(c => c.Type == "email")?.Value;
+            var email = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Email)?.Value;
+            Console.WriteLine("Claims received: " + string.Join(", ", User.Claims.Select(c => $"{c.Type}={c.Value}")));
 
             if (string.IsNullOrEmpty(email))
                 return Unauthorized("Email claim not found in token.");
