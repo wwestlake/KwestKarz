@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using KwestKarz.Services;
 using System;
 using System.Threading.Tasks;
+using Microsoft.IdentityModel.Tokens;
 
 namespace KwestKarz.Controllers
 {
@@ -78,5 +79,43 @@ namespace KwestKarz.Controllers
                 return BadRequest(ex.Message);
             }
         }
+
+        [HttpPost("setup")]
+        [AllowAnonymous]
+        public async Task<IActionResult> CompleteAccountSetup([FromBody] CompleteAccountSetupRequest request)
+        {
+            if (string.IsNullOrWhiteSpace(request.Token) ||
+                string.IsNullOrWhiteSpace(request.Password))
+                return BadRequest("Token and password are required.");
+
+            try
+            {
+                await _accountService.CompleteAccountSetupAsync(
+                    request.Token,
+                    request.Password,
+                    request.FirstName,
+                    request.LastName
+                );
+                return Ok();
+            }
+            catch (SecurityTokenException ex)
+            {
+                return Unauthorized(ex.Message);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, ex.Message);
+            }
+        }
+
     }
+
+    public class CompleteAccountSetupRequest
+    {
+        public string Token { get; set; }
+        public string Password { get; set; }
+        public string FirstName { get; set; }
+        public string LastName { get; set; }
+    }
+
 }

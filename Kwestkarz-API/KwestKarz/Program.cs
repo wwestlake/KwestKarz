@@ -2,6 +2,7 @@
 using KwestKarz.Entities;
 using KwestKarz.Services;
 using KwestKarz.Services.Configuration;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
@@ -129,6 +130,8 @@ namespace KwestKarz
             builder.Services.AddScoped<ILogService, LogService>();
             builder.Services.AddScoped<IApiKeyService,  ApiKeyService>();
             builder.Services.AddScoped<IMemoService, MemoService>();
+            builder.Services.AddScoped<IPasswordHasher<UserAccount>, PasswordHasher<UserAccount>>();
+
 
             ////////////////////////////////////////////
             /// Build

@@ -11,7 +11,8 @@ import DashboardLayout from "./components/DashboardLayout";
 import { Navigate } from "react-router-dom";
 import { clearToken } from "./services/sessionService";
 import UserManagement from "./pages/UserManagement";
-
+import InviteUser from "./pages/InviteUser";
+import CompleteAccountSetup from "./pages/CompleteAccountSetup";
 
 function App() {
   return (
@@ -26,7 +27,9 @@ function App() {
           <Route path="/login" element={<Login />} />
           <Route path="/dashboard" element={<DashboardLayout />} />
           <Route path="/dashboard/users" element={<UserManagement />} />
-
+          <Route path="/dashboard/users/invite" element={<InviteUser />} />
+          {/* Add more dashboard routes as needed */}
+          <Route path="/setup-account" element={<CompleteAccountSetup />} />
           <Route path="/logout" element={
                 (() => {
                   clearToken();

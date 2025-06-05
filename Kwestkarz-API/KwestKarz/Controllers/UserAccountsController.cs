@@ -55,6 +55,16 @@ namespace KwestKarz.Controllers
         }
 
 
+        [HttpPost("invite")]
+        [Authorize(Roles = "Admin")]
+        public async Task<IActionResult> InviteUser([FromBody] InviteUserRequest request)
+        {
+            if (string.IsNullOrWhiteSpace(request.Email))
+                return BadRequest("Email is required.");
+
+            await _accountService.InviteUserAsync(request.Email);
+            return Ok();
+        }
 
 
     }

@@ -27,5 +27,11 @@ namespace KwestKarz.Entities
         public bool RequiresPasswordReset { get; set; } = false;
 
         public ICollection<UserRole> Roles { get; set; } = new List<UserRole>();
+
+        [MaxLength(100)]
+        public string? FirstName { get; set; }
+
+        [MaxLength(100)]
+        public string? LastName { get; set; }
     }
 }

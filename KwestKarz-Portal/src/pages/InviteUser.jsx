@@ -1,0 +1,42 @@
+// pages/InviteUser.jsx
+import { useState } from "react";
+import config from "../config";
+
+export default function InviteUser() {
+  const [email, setEmail] = useState("");
+  const [status, setStatus] = useState("");
+
+  async function handleInvite(e) {
+    e.preventDefault();
+    setStatus("");
+    const res = await fetch(`${config.apiBaseUrl}/api/UserAccounts/invite`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email })
+    });
+    if (res.ok) {
+      setStatus("Invite sent!");
+      setEmail("");
+    } else {
+      setStatus("Error sending invite.");
+    }
+  }
+
+  return (
+    <form onSubmit={handleInvite} className="max-w-md mx-auto p-4">
+      <h2 className="text-xl font-bold mb-4">Send User Invite</h2>
+      <input
+        type="email"
+        required
+        value={email}
+        onChange={(e) => setEmail(e.target.value)}
+        placeholder="user@example.com"
+        className="w-full mb-2 p-2 border rounded"
+      />
+      <button type="submit" className="bg-accent text-white px-4 py-2 rounded">
+        Send Invite
+      </button>
+      {status && <p className="mt-2 text-sm">{status}</p>}
+    </form>
+  );
+}

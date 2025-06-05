@@ -12,5 +12,7 @@ namespace KwestKarz.Services
         Task<UserAccount> GetAccountByEmailAsync(string email);
         Task<UserAccount> GetAccountByIdAsync(Guid id);
         Task UpdateAccountAsync(UserAccount updated);
+        Task InviteUserAsync(string email);
+        Task CompleteAccountSetupAsync(string token, string password, string firstName, string lastName);
     }
 }

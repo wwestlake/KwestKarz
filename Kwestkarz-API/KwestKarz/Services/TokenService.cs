@@ -5,6 +5,9 @@ using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using KwestKarz.Entities;
+using Microsoft.IdentityModel.Tokens;
+using System.IdentityModel.Tokens.Jwt;
+using System.Text;
 
 namespace KwestKarz.Services
 {
@@ -54,5 +57,59 @@ namespace KwestKarz.Services
                 audience,
                 expiresIn);
         }
+
+        public string GenerateAccountSetupToken(string email)
+        {
+            var expiryHours = _configuration.GetValue<int>("AccountSetup:TokenExpiryHours");
+
+            var claims = new[]
+            {
+                new Claim(JwtRegisteredClaimNames.Sub, email),
+                new Claim("purpose", "account_setup")
+            };
+
+            var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["Jwt:SecretKey"]));
+            var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
+            var expires = DateTime.UtcNow.AddHours(expiryHours);
+
+            var token = new JwtSecurityToken(
+                issuer: _configuration["Jwt:Issuer"],
+                audience: _configuration["Jwt:Audience"],
+                claims: claims,
+                expires: expires,
+                signingCredentials: creds
+            );
+
+            return new JwtSecurityTokenHandler().WriteToken(token);
+        }
+
+        public ClaimsPrincipal GetClaimsFromToken(string token)
+        {
+            var tokenHandler = new JwtSecurityTokenHandler();
+            var key = Encoding.UTF8.GetBytes(_configuration["Jwt:SecretKey"]);
+
+            var validationParameters = new TokenValidationParameters
+            {
+                ValidateIssuerSigningKey = true,
+                IssuerSigningKey = new SymmetricSecurityKey(key),
+                ValidateIssuer = true,
+                ValidIssuer = _configuration["Jwt:Issuer"],
+                ValidateAudience = true,
+                ValidAudience = _configuration["Jwt:Audience"],
+                ValidateLifetime = true,
+                ClockSkew = TimeSpan.FromMinutes(5)
+            };
+
+            try
+            {
+                var principal = tokenHandler.ValidateToken(token, validationParameters, out var validatedToken);
+                return principal;
+            }
+            catch
+            {
+                return null;
+            }
+        }
+
     }
 }
