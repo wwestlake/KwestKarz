@@ -1,0 +1,1058 @@
+// D:\01-Turo-Car-Rental-Business\Projects\KwestKarz\KwestKarz-Portal\src\components\Banner.jsx
+export default function Banner({ title, subtitle, cta, onClick }) {
+    return (
+      <section className="bg-background text-text py-16 px-4 text-center">
+        <h2 className="text-4xl font-bold mb-4">{title}</h2>
+        {subtitle && <p className="text-lg mb-6 max-w-xl mx-auto">{subtitle}</p>}
+        {cta && (
+          <button
+            onClick={onClick}
+            className="bg-accent text-white px-6 py-3 rounded hover:opacity-90"
+          >
+            {cta}
+          </button>
+        )}
+      </section>
+    );
+  }
+  
+
+
+// D:\01-Turo-Car-Rental-Business\Projects\KwestKarz\KwestKarz-Portal\src\components\DashboardLayout.jsx
+import { useState } from "react";
+import { NavLink } from "react-router-dom";
+import useIdleLogout from "../hooks/useIdleLogout";
+
+const menuItems = [
+  { label: "Task", path: "/task" },
+  { label: "Maintenance", path: "/maintenance" },
+  { label: "Finance", path: "/finance" },
+  { label: "Customer Relations", path: "/crm" },
+  { label: "Settings", path: "/settings" },
+  { label: "System Administration", path: "/admin" },
+  { label: "User Management", path: "/dashboard/users" },
+  { label: "Invite User", path: "/dashboard/users/invite" },
+  { label: "Reports", path: "/reports" },
+  { label: "Analytics", path: "/analytics" },
+  { label: "Notifications", path: "/notifications" },
+  { label: "Help & Support", path: "/help" },
+  { label: "Log Out", path: "/logout" }
+];
+
+export default function DashboardLayout({ children }) {
+  useIdleLogout();
+  const [isOpen, setIsOpen] = useState(false);
+
+  return (
+    <div className="flex min-h-screen bg-background text-text">
+      {/* Mobile toggle button */}
+      <button
+        onClick={() => setIsOpen(!isOpen)}
+        className="sm:hidden fixed top-4 left-4 z-50 bg-accent text-white p-2 rounded shadow"
+      >
+        ☰
+      </button>
+
+      {/* Sidebar */}
+      <aside
+        className={`fixed sm:static top-0 left-0 h-full w-64 bg-primary p-4 z-40 transform transition-transform duration-300 ${
+          isOpen ? "translate-x-0" : "-translate-x-full sm:translate-x-0"
+        }`}
+      >
+        <h2 className="text-xl font-bold text-accent mb-6">Menu</h2>
+        <nav className="space-y-2">
+          {menuItems.map(({ label, path }) => (
+            <NavLink
+              key={path}
+              to={path}
+              className={({ isActive }) =>
+                `block px-4 py-2 rounded ${
+                  isActive ? "bg-accent text-white" : "hover:bg-secondary"
+                }`
+              }
+              onClick={() => setIsOpen(false)} // close on nav click
+            >
+              {label}
+            </NavLink>
+          ))}
+        </nav>
+      </aside>
+
+      {/* Main content */}
+      <main className="flex-1 p-6 sm:ml-64">{children}</main>
+    </div>
+  );
+}
+
+
+// D:\01-Turo-Car-Rental-Business\Projects\KwestKarz\KwestKarz-Portal\src\components\Header.jsx
+import { NavLink } from "react-router-dom";
+import UserMenu from "./UserMenu";
+import { isLoggedIn, onAuthChange } from "../services/sessionService";
+import { useState, useEffect } from "react";
+
+const navLinkClass = ({ isActive }) =>
+  `block px-3 py-2 rounded-md text-sm font-medium ${
+    isActive ? "bg-accent text-white" : "text-text hover:bg-secondary"
+  }`;
+
+export default function Header() {
+  const [loggedIn, setLoggedIn] = useState(isLoggedIn());
+  const [menuOpen, setMenuOpen] = useState(false);
+
+  useEffect(() => {
+    setLoggedIn(isLoggedIn());
+    const unsubscribe = onAuthChange(() => setLoggedIn(isLoggedIn()));
+    return unsubscribe;
+  }, []);
+
+  return (
+    <header className="bg-primary shadow">
+      <div className="max-w-7xl mx-auto px-4 py-3 flex flex-wrap justify-between items-center">
+        <h1 className="text-xl font-bold text-white">Kwest Karz</h1>
+        <button
+          className="sm:hidden text-white text-xl"
+          onClick={() => setMenuOpen(!menuOpen)}
+        >
+          ☰
+        </button>
+        <nav
+          className={`w-full sm:w-auto sm:flex ${
+            menuOpen ? "block" : "hidden"
+          } sm:space-x-2 mt-2 sm:mt-0`}
+        >
+          <NavLink to="/" className={navLinkClass}>Home</NavLink>
+          <NavLink to="/vehicles" className={navLinkClass}>Vehicles</NavLink>
+          <NavLink to="/turo" className={navLinkClass}>Turo</NavLink>
+          <NavLink to="/help" className={navLinkClass}>Help</NavLink>
+          <NavLink to="/contact" className={navLinkClass}>Contact</NavLink>
+          {loggedIn ? <UserMenu /> : <NavLink to="/login" className={navLinkClass}>Login</NavLink>}
+        </nav>
+      </div>
+    </header>
+  );
+}
+
+
+// D:\01-Turo-Car-Rental-Business\Projects\KwestKarz\KwestKarz-Portal\src\components\Layout.jsx
+import Header from "./Header";
+
+export default function Layout({ children }) {
+  return (
+    <div className="min-h-screen flex flex-col bg-background text-text overflow-x-hidden">
+      <Header />
+      <main className="flex-1 px-4 py-6">{children}</main>
+      <footer className="bg-secondary text-sm text-text text-center py-4">
+        &copy; {new Date().getFullYear()} Kwest Karz. All rights reserved.
+      </footer>
+    </div>
+  );
+}
+// This is the main layout component that wraps around all pages.
+// It includes the Header at the top, a main content area, and a footer.
+
+
+// D:\01-Turo-Car-Rental-Business\Projects\KwestKarz\KwestKarz-Portal\src\components\UserMenu.jsx
+import { useState, useEffect, useRef } from "react";
+import { getClaims, clearToken } from "../services/sessionService";
+import { useNavigate } from "react-router-dom";
+
+export default function UserMenu() {
+  console.log("UserMenu claims:", getClaims());
+  const [open, setOpen] = useState(false);
+  const [initials, setInitials] = useState("UU");
+  const menuRef = useRef();
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    const claims = getClaims();
+    if (claims?.email) {
+      const [name] = claims.email.split("@");
+      const parts = name.split(".");
+      const initials = parts.map(p => p[0]).join("").toUpperCase().slice(0, 2);
+      setInitials(initials);
+    }
+  }, []);
+
+  useEffect(() => {
+    function handleClickOutside(e) {
+      if (menuRef.current && !menuRef.current.contains(e.target)) {
+        setOpen(false);
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
+  function handleLogout() {
+    clearToken();
+    navigate("/login");
+  }
+
+  return (
+    <div className="relative" ref={menuRef}>
+      <button
+        onClick={() => setOpen(!open)}
+        className="w-10 h-10 rounded-full bg-accent text-white flex items-center justify-center font-bold"
+      >
+        {initials}
+      </button>
+      {open && (
+        <div className="absolute right-0 mt-2 w-48 bg-white shadow-lg rounded-md z-10 text-sm">
+          <button
+                onClick={() => navigate("/change-password")}
+                    className="block w-full text-left px-4 py-2 hover:bg-gray-100 text-black"
+            >
+                Change Password
+          </button>
+          <button
+            onClick={handleLogout}
+            className="block w-full text-left px-4 py-2 hover:bg-gray-100 text-red-600"
+          >
+            Log Out
+          </button>
+        </div>
+      )}
+    </div>
+  );
+}
+
+
+// D:\01-Turo-Car-Rental-Business\Projects\KwestKarz\KwestKarz-Portal\src\hooks\useIdleLogout.js
+import { useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import { clearToken, isLoggedIn } from "../services/sessionService";
+
+const IDLE_TIMEOUT_MS = 15 * 60 * 1000; // 15 minutes
+
+export default function useIdleLogout() {
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    if (!isLoggedIn()) return;
+
+    let timeout;
+
+    const resetTimer = () => {
+      clearTimeout(timeout);
+      timeout = setTimeout(() => {
+        clearToken();
+        navigate("/login");
+      }, IDLE_TIMEOUT_MS);
+    };
+
+    const events = ["mousemove", "keydown", "mousedown", "touchstart"];
+
+    events.forEach((event) => window.addEventListener(event, resetTimer));
+    resetTimer(); // start timer
+
+    return () => {
+      events.forEach((event) => window.removeEventListener(event, resetTimer));
+      clearTimeout(timeout);
+    };
+  }, []);
+}
+
+
+// D:\01-Turo-Car-Rental-Business\Projects\KwestKarz\KwestKarz-Portal\src\pages\ChangePassword.jsx
+// pages/ChangePassword.jsx
+import { useState } from "react";
+import { changePassword } from "../services/userService";
+
+export default function ChangePassword() {
+  const [form, setForm] = useState({ currentPassword: "", newPassword: "", confirmPassword: "" });
+  const [status, setStatus] = useState("");
+
+  async function handleSubmit(e) {
+    e.preventDefault();
+    setStatus("");
+
+    if (form.newPassword !== form.confirmPassword) {
+      setStatus("New passwords do not match.");
+      return;
+    }
+
+    try {
+        await changePassword({
+            currentPassword: form.currentPassword,
+            newPassword: form.newPassword
+          });
+          
+      setStatus("Password changed successfully.");
+      setForm({ currentPassword: "", newPassword: "", confirmPassword: "" });
+    } catch (err) {
+      setStatus("Password change failed.");
+    }
+  }
+
+  return (
+    <form onSubmit={handleSubmit} className="max-w-md mx-auto p-4">
+      <h2 className="text-xl font-bold mb-4">Change Password</h2>
+
+      <input
+        type="password"
+        placeholder="Current Password"
+        value={form.currentPassword}
+        onChange={(e) => setForm({ ...form, currentPassword: e.target.value })}
+        required
+        autoComplete="current-password"
+        className="w-full mb-4 p-2 border rounded bg-background text-text"
+      />
+
+      <input
+        type="password"
+        placeholder="New Password"
+        value={form.newPassword}
+        onChange={(e) => setForm({ ...form, newPassword: e.target.value })}
+        required
+        autoComplete="new-password"
+        className="w-full mb-4 p-2 border rounded bg-background text-text"
+      />
+
+      <input
+        type="password"
+        placeholder="Confirm Password"
+        value={form.confirmPassword}
+        onChange={(e) => setForm({ ...form, confirmPassword: e.target.value })}
+        required
+        autoComplete="new-password"
+        className="w-full mb-4 p-2 border rounded bg-background text-text"
+      />
+
+      <button type="submit" className="bg-accent text-white px-4 py-2 rounded">
+        Change Password
+      </button>
+
+      {status && <p className="mt-2 text-sm">{status}</p>}
+    </form>
+  );
+}
+
+
+// D:\01-Turo-Car-Rental-Business\Projects\KwestKarz\KwestKarz-Portal\src\pages\CompleteAccountSetup.jsx
+import { useState } from "react";
+import { useSearchParams } from "react-router-dom";
+import config from "../config";
+
+export default function CompleteAccountSetup() {
+  const [params] = useSearchParams();
+  const token = params.get("token");
+
+  const [form, setForm] = useState({
+    firstName: "",
+    lastName: "",
+    password: "",
+    confirmPassword: ""
+  });
+  const [status, setStatus] = useState("");
+
+  async function handleSubmit(e) {
+    e.preventDefault();
+    setStatus("");
+
+    if (form.password !== form.confirmPassword) {
+      setStatus("Passwords do not match.");
+      return;
+    }
+
+    const { confirmPassword, ...payload } = form;
+
+    const res = await fetch(`${config.apiBaseUrl}/api/Auth/setup`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ ...payload, token })
+    });
+
+    setStatus(res.ok ? "Setup complete!" : "Setup failed.");
+  }
+
+  return (
+    <form onSubmit={handleSubmit} className="max-w-md mx-auto p-4 text-text">
+      <h2 className="text-xl font-bold mb-4">Complete Account Setup</h2>
+
+      <label className="block mb-1">First Name</label>
+      <input
+        type="text"
+        placeholder="First Name"
+        value={form.firstName}
+        onChange={(e) => setForm({ ...form, firstName: e.target.value })}
+        required
+        className="w-full mb-4 p-2 border rounded bg-background text-text"
+      />
+
+      <label className="block mb-1">Last Name</label>
+      <input
+        type="text"
+        placeholder="Last Name"
+        value={form.lastName}
+        onChange={(e) => setForm({ ...form, lastName: e.target.value })}
+        required
+        className="w-full mb-4 p-2 border rounded bg-background text-text"
+      />
+
+      <label className="block mb-1">Password</label>
+      <input
+        type="password"
+        placeholder="Password"
+        value={form.password}
+        onChange={(e) => setForm({ ...form, password: e.target.value })}
+        required
+        className="w-full mb-4 p-2 border rounded bg-background text-text"
+      />
+
+      <label className="block mb-1">Confirm Password</label>
+      <input
+        type="password"
+        placeholder="Confirm Password"
+        value={form.confirmPassword}
+        onChange={(e) => setForm({ ...form, confirmPassword: e.target.value })}
+        required
+        className="w-full mb-4 p-2 border rounded bg-background text-text"
+      />
+
+      <button type="submit" className="bg-accent text-white px-4 py-2 rounded">
+        Complete Setup
+      </button>
+      {status && <p className="mt-2 text-sm">{status}</p>}
+    </form>
+  );
+}
+
+
+// D:\01-Turo-Car-Rental-Business\Projects\KwestKarz\KwestKarz-Portal\src\pages\Contact.jsx
+export default function Contact() {
+    return (
+      <div className="text-center mt-10 text-lg text-text">
+        <h2>Contact Page</h2>
+        <p>This is a placeholder. Real content coming soon.</p>
+      </div>
+    );
+  } 
+  
+
+
+// D:\01-Turo-Car-Rental-Business\Projects\KwestKarz\KwestKarz-Portal\src\pages\Help.jsx
+export default function Help() {
+    return (
+      <div className="text-center mt-10 text-lg text-text">
+        <h2>Help Page</h2>
+        <p>This is a placeholder. Real content coming soon.</p>
+      </div>
+    );
+  }
+  
+
+
+// D:\01-Turo-Car-Rental-Business\Projects\KwestKarz\KwestKarz-Portal\src\pages\Home.jsx
+import Banner from "../components/Banner";
+
+export default function Home() {
+  return (
+    <>
+      <Banner
+        title="Metro Detroit Car Rentals, Reinvented"
+        subtitle="Well-maintained, reliable vehicles on your schedule – all through the Turo platform."
+        cta="Browse Our Fleet"
+        onClick={() => window.location.href = "/vehicles"}
+      />
+      <div className="text-center text-sm text-secondary mt-8">
+        <p>More info and feature sections coming soon.</p>
+      </div>
+    </>
+  );
+}
+
+
+// D:\01-Turo-Car-Rental-Business\Projects\KwestKarz\KwestKarz-Portal\src\pages\InviteUser.jsx
+import { useState } from "react";
+import { inviteUser } from "../services/userService";
+
+export default function InviteUser() {
+  const [email, setEmail] = useState("");
+  const [status, setStatus] = useState("");
+
+  async function handleInvite(e) {
+    e.preventDefault();
+    setStatus("");
+
+    try {
+      await inviteUser(email);
+      setStatus("Invite sent!");
+      setEmail("");
+    } catch (err) {
+      setStatus("Error sending invite.");
+    }
+  }
+
+  return (
+    <form onSubmit={handleInvite} className="max-w-md mx-auto p-4">
+      <h2 className="text-xl font-bold mb-4">Send User Invite</h2>
+      <input
+        type="email"
+        required
+        value={email}
+        onChange={(e) => setEmail(e.target.value)}
+        placeholder="user@example.com"
+        className="w-full mb-2 p-2 border rounded bg-white text-black"
+      />
+      <button type="submit" className="bg-accent text-white px-4 py-2 rounded">
+        Send Invite
+      </button>
+      {status && <p className="mt-2 text-sm">{status}</p>}
+    </form>
+  );
+}
+
+
+// D:\01-Turo-Car-Rental-Business\Projects\KwestKarz\KwestKarz-Portal\src\pages\Login.jsx
+import { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { processLogin } from "../services/sessionCoordinator";
+
+export default function Login() {
+  const [username, setUsername] = useState("");
+  const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
+  const [loggedIn, setLoggedIn] = useState(false);
+  const navigate = useNavigate();
+
+  async function handleSubmit(e) {
+    e.preventDefault();
+    setError("");
+
+    const result = await processLogin(username, password);
+
+    if (result.success) {
+      setLoggedIn(true);
+      setTimeout(() => {
+        navigate("/dashboard");
+      }, 5000);
+    } else {
+      setError(result.error);
+    }
+  }
+
+  return (
+    <div className="max-w-md mx-auto mt-20 p-6 bg-secondary rounded shadow">
+      <h2 className="text-center text-2xl font-bold text-accent mb-6">
+        Employees Only
+      </h2>
+
+      {loggedIn ? (
+        <p className="text-center text-blue-400 font-semibold">You are logged in</p>
+      ) : (
+        <>
+          {error && <p className="text-red-500 mb-4 text-center">{error}</p>}
+          <form onSubmit={handleSubmit} className="space-y-4">
+            <div>
+              <label htmlFor="username" className="block text-sm mb-1 text-text">
+                User Name
+              </label>
+              <input
+                type="text"
+                id="username"
+                value={username}
+                onChange={(e) => setUsername(e.target.value)}
+                className="w-full px-4 py-2 rounded bg-background text-text border border-gray-600 focus:outline-none focus:ring focus:ring-accent"
+              />
+            </div>
+            <div>
+              <label htmlFor="password" className="block text-sm mb-1 text-text">
+                Password
+              </label>
+              <input
+                type="password"
+                id="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                className="w-full px-4 py-2 rounded bg-background text-text border border-gray-600 focus:outline-none focus:ring focus:ring-accent"
+              />
+            </div>
+            <button
+              type="submit"
+              className="w-full py-2 bg-accent text-white font-semibold rounded hover:bg-opacity-90"
+            >
+              Login
+            </button>
+          </form>
+        </>
+      )}
+    </div>
+  );
+}
+
+
+// D:\01-Turo-Car-Rental-Business\Projects\KwestKarz\KwestKarz-Portal\src\pages\Turo.jsx
+export default function Turo() {
+    return (
+      <div className="text-center mt-10 text-lg text-text">
+        <h2>Turo Page</h2>
+        <p>This is a placeholder. Real content coming soon.</p>
+      </div>
+    );
+  }
+  
+
+
+// D:\01-Turo-Car-Rental-Business\Projects\KwestKarz\KwestKarz-Portal\src\pages\UserManagement.jsx
+import { useEffect, useState } from "react";
+import {
+  getUsers,
+  getUserById,
+  createUser,
+  updateUser,
+  disableUser,
+  enableUser,
+} from "../services/userService";
+
+export default function UserManagement() {
+  const [users, setUsers] = useState([]);
+  const [filter, setFilter] = useState("");
+  const [selectedUser, setSelectedUser] = useState(null);
+  const [error, setError] = useState("");
+
+  useEffect(() => {
+    loadUsers();
+  }, []);
+
+  async function loadUsers() {
+    try {
+      const data = await getUsers();
+      setUsers(data);
+    } catch (err) {
+      setError(err.message);
+    }
+  }
+
+  function handleSelect(user) {
+    setSelectedUser(user);
+  }
+
+  const filteredUsers = users.filter((u) =>
+    u.email.toLowerCase().includes(filter.toLowerCase())
+  );
+
+  return (
+    <div className="flex gap-4 p-4">
+      <div className="w-1/3">
+        <input
+          type="text"
+          placeholder="Filter by email..."
+          value={filter}
+          onChange={(e) => setFilter(e.target.value)}
+          className="w-full mb-4 p-2 border rounded"
+        />
+        <ul className="border rounded divide-y max-h-[70vh] overflow-auto">
+          {filteredUsers.map((user) => (
+            <li
+              key={user.id}
+              className="p-2 hover:bg-accent hover:text-white cursor-pointer"
+              onClick={() => handleSelect(user)}
+            >
+              {user.email}
+            </li>
+          ))}
+        </ul>
+      </div>
+      <div className="w-2/3 border rounded p-4">
+        {selectedUser ? (
+          <div>
+            <h2 className="text-xl font-semibold mb-4">{selectedUser.username}</h2>
+            <p>Email: {selectedUser.email}</p>
+            <p>Status: {selectedUser.isActive ? "Active" : "Disabled"}</p>
+            <div className="mt-4 flex gap-2">
+              {selectedUser.isActive ? (
+                <button
+                  onClick={() => {
+                    disableUser(selectedUser.id).then(loadUsers);
+                  }}
+                  className="bg-red-500 text-white px-4 py-2 rounded"
+                >
+                  Disable
+                </button>
+              ) : (
+                <button
+                  onClick={() => {
+                    enableUser(selectedUser.id).then(loadUsers);
+                  }}
+                  className="bg-green-500 text-white px-4 py-2 rounded"
+                >
+                  Enable
+                </button>
+              )}
+            </div>
+          </div>
+        ) : (
+          <p>Select a user to view details.</p>
+        )}
+      </div>
+    </div>
+  );
+}
+
+
+// D:\01-Turo-Car-Rental-Business\Projects\KwestKarz\KwestKarz-Portal\src\pages\Vehicles.jsx
+export default function Vehicles() {
+    return (
+      <div className="text-center mt-10 text-lg text-text">
+        <h2>Vehicles Page</h2>
+        <p>This is a placeholder. Real content coming soon.</p>
+      </div>
+    );
+  }
+  
+
+
+// D:\01-Turo-Car-Rental-Business\Projects\KwestKarz\KwestKarz-Portal\src\services\authService.js
+import config from '../config';
+
+export async function login(usernameOrEmail, password) {
+  const res = await fetch(`${config.apiBaseUrl}/Auth/login`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({ usernameOrEmail, password }),
+  });
+
+  if (!res.ok) {
+    throw new Error('Login failed');
+  }
+
+  const data = await res.json();
+  return data.token;
+}
+
+
+// D:\01-Turo-Car-Rental-Business\Projects\KwestKarz\KwestKarz-Portal\src\services\sessionCoordinator.js
+import { login as apiLogin } from './authService';
+import {
+  saveToken,
+  getClaims,
+  getRoles,
+  clearToken,
+} from './sessionService';
+
+export async function processLogin(username, password) {
+  try {
+    const token = await apiLogin(username, password);
+    saveToken(token);
+
+    const roles = getRoles();
+    const claims = getClaims();
+
+    return {
+      success: true,
+      token,
+      roles,
+      claims,
+    };
+  } catch (err) {
+    clearToken();
+    return {
+      success: false,
+      error: err.message || 'Login failed',
+    };
+  }
+}
+
+
+// D:\01-Turo-Car-Rental-Business\Projects\KwestKarz\KwestKarz-Portal\src\services\sessionService.js
+const TOKEN_KEY = 'kwestkarz_jwt';
+
+export function saveToken(token) {
+  localStorage.setItem(TOKEN_KEY, token);
+  notifyAuthChanged();
+}
+
+
+export function getToken() {
+  return localStorage.getItem(TOKEN_KEY);
+}
+
+export function clearToken() {
+  localStorage.removeItem(TOKEN_KEY);
+  notifyAuthChanged();
+}
+
+export function isLoggedIn() {
+  return !!getToken();
+}
+
+export function getClaims() {
+  const token = getToken();
+  if (!token) return null;
+
+  try {
+    const [, payload] = token.split('.');
+    const decoded = JSON.parse(atob(payload));
+    return decoded;
+  } catch (err) {
+    return null;
+  }
+}
+
+export function getRoles() {
+  const claims = getClaims();
+  if (!claims) return [];
+  
+  // Your roles claim path may vary depending on how it's issued
+  const roleClaim = Object.entries(claims).find(([key]) => key.toLowerCase().includes('/role'));
+  return roleClaim ? roleClaim[1].split(',') : [];
+}
+
+const listeners = new Set();
+
+export function onAuthChange(listener) {
+  listeners.add(listener);
+  return () => listeners.delete(listener);
+}
+
+function notifyAuthChanged() {
+  for (const fn of listeners) fn();
+}
+
+
+// D:\01-Turo-Car-Rental-Business\Projects\KwestKarz\KwestKarz-Portal\src\services\userService.js
+import { getToken } from './sessionService';
+import config from '../config';
+
+const baseUrl = `${config.apiBaseUrl}/UserAccounts`;
+
+function authHeader() {
+  const token = getToken();
+  return token ? { Authorization: `Bearer ${token}` } : {};
+}
+
+export async function getUsers() {
+  const res = await fetch(baseUrl, {
+    headers: {
+      ...authHeader(),
+    },
+  });
+  if (!res.ok) throw new Error('Failed to fetch users');
+  return res.json();
+}
+
+export async function getUserById(id) {
+  const res = await fetch(`${baseUrl}/${id}`, {
+    headers: {
+      ...authHeader(),
+    },
+  });
+  if (!res.ok) throw new Error('Failed to fetch user');
+  return res.json();
+}
+
+export async function createUser(data) {
+  const res = await fetch(`${config.apiBaseUrl}/Auth/create-account`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      ...authHeader(),
+    },
+    body: JSON.stringify(data),
+  });
+  if (!res.ok) throw new Error('Failed to create user');
+  return res.json();
+}
+
+export async function updateUser(id, data) {
+  const res = await fetch(`${baseUrl}/${id}`, {
+    method: 'PUT',
+    headers: {
+      'Content-Type': 'application/json',
+      ...authHeader(),
+    },
+    body: JSON.stringify(data),
+  });
+  if (!res.ok) throw new Error('Failed to update user');
+}
+
+export async function disableUser(id) {
+  const res = await fetch(`${baseUrl}/${id}/disable`, {
+    method: 'POST',
+    headers: authHeader(),
+  });
+  if (!res.ok) throw new Error('Failed to disable user');
+}
+
+export async function enableUser(id) {
+  const res = await fetch(`${baseUrl}/${id}/enable`, {
+    method: 'POST',
+    headers: authHeader(),
+  });
+  if (!res.ok) throw new Error('Failed to enable user');
+}
+
+export async function inviteUser(email) {
+  const res = await fetch(`${baseUrl}/invite`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      ...authHeader(),
+    },
+    body: JSON.stringify({ email }),
+  });
+  if (!res.ok) throw new Error('Failed to send invite');
+}
+
+export async function changePassword(data) {
+    const res = await fetch(`${config.apiBaseUrl}/Auth/change-password`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        ...authHeader(),
+      },
+      body: JSON.stringify(data),
+    });
+  
+    if (!res.ok) throw new Error('Failed to change password');
+  }
+  
+
+
+// D:\01-Turo-Car-Rental-Business\Projects\KwestKarz\KwestKarz-Portal\src\App.jsx
+import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import Layout from "./components/Layout";
+
+import Home from "./pages/Home";
+import Vehicles from "./pages/Vehicles";
+import Turo from "./pages/Turo";
+import Help from "./pages/Help";
+import Contact from "./pages/Contact";
+import Login from "./pages/Login";
+import DashboardLayout from "./components/DashboardLayout";
+import { Navigate } from "react-router-dom";
+import { clearToken } from "./services/sessionService";
+import UserManagement from "./pages/UserManagement";
+import InviteUser from "./pages/InviteUser";
+import CompleteAccountSetup from "./pages/CompleteAccountSetup";
+import ChangePassword from "./pages/ChangePassword";
+
+function App() {
+  return (
+    <Router>
+      <Layout>
+        <Routes>
+          <Route path="/" element={<Home />} />
+          <Route path="/vehicles" element={<Vehicles />} />
+          <Route path="/turo" element={<Turo />} />
+          <Route path="/help" element={<Help />} />
+          <Route path="/contact" element={<Contact />} />
+          <Route path="/login" element={<Login />} />
+          <Route path="/dashboard" element={<DashboardLayout />} />
+          <Route path="/dashboard/users" element={<UserManagement />} />
+          <Route path="/dashboard/users/invite" element={<InviteUser />} />
+          {/* Add more dashboard routes as needed */}
+          <Route path="/setup-account" element={<CompleteAccountSetup />} />
+          <Route path="/change-password" element={<ChangePassword />} />
+          <Route path="/logout" element={
+                (() => {
+                  clearToken();
+                  return <Navigate to="/login" replace />;
+                })()
+          } />
+        </Routes>
+      </Layout>
+    </Router>
+  );
+}
+
+export default App;
+
+
+// D:\01-Turo-Car-Rental-Business\Projects\KwestKarz\KwestKarz-Portal\src\config.js
+const config = {
+    apiBaseUrl: import.meta.env.VITE_API_BASE_URL || 'https://localhost:7102/api',
+  };
+  
+  export default config;
+  
+
+
+// D:\01-Turo-Car-Rental-Business\Projects\KwestKarz\KwestKarz-Portal\src\main.jsx
+import { StrictMode } from 'react'
+import { createRoot } from 'react-dom/client'
+import './index.css'
+import App from './App.jsx'
+
+createRoot(document.getElementById('root')).render(
+  <StrictMode>
+    <App />
+  </StrictMode>,
+)
+
+
+// D:\01-Turo-Car-Rental-Business\Projects\KwestKarz\KwestKarz-Portal\eslint.config.js
+import js from '@eslint/js'
+import globals from 'globals'
+import reactHooks from 'eslint-plugin-react-hooks'
+import reactRefresh from 'eslint-plugin-react-refresh'
+
+export default [
+  { ignores: ['dist'] },
+  {
+    files: ['**/*.{js,jsx}'],
+    languageOptions: {
+      ecmaVersion: 2020,
+      globals: globals.browser,
+      parserOptions: {
+        ecmaVersion: 'latest',
+        ecmaFeatures: { jsx: true },
+        sourceType: 'module',
+      },
+    },
+    plugins: {
+      'react-hooks': reactHooks,
+      'react-refresh': reactRefresh,
+    },
+    rules: {
+      ...js.configs.recommended.rules,
+      ...reactHooks.configs.recommended.rules,
+      'no-unused-vars': ['error', { varsIgnorePattern: '^[A-Z_]' }],
+      'react-refresh/only-export-components': [
+        'warn',
+        { allowConstantExport: true },
+      ],
+    },
+  },
+]
+
+
+// D:\01-Turo-Car-Rental-Business\Projects\KwestKarz\KwestKarz-Portal\tailwind.config.js
+module.exports = {
+    content: [
+      "./index.html",
+      "./src/**/*.{js,ts,jsx,tsx}"
+    ],
+    theme: {
+      extend: {
+        colors: {
+          primary: '#111827',
+          secondary: '#4b5563',
+          accent: '#14b8a6',
+          background: '#1f2937',
+          text: '#f3f4f6',
+        },
+      },
+    },
+    plugins: [],
+  }
+  
+
+
+// D:\01-Turo-Car-Rental-Business\Projects\KwestKarz\KwestKarz-Portal\vite.config.js
+import { defineConfig } from 'vite'
+import react from '@vitejs/plugin-react-swc'
+import path from 'path'
+
+export default defineConfig({
+  base: "/",
+  plugins: [react()],
+  css: {
+    postcss: path.resolve(__dirname, './postcss.config.cjs'),
+  },
+})
+
+
