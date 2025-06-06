@@ -53,29 +53,13 @@ namespace KwestKarz.Services
 
             if (user == null || !user.IsActive)
             {
-                await _emailService.SendEmailAsync(
-                    "wwestlake@lagdaemon.com",
-                    "Login Failed",
-                    $"Login failed for: {usernameOrEmail} at {timestamp} (invalid or inactive)"
-                );
                 throw new UnauthorizedAccessException("Invalid credentials or inactive account.");
             }
 
             if (!BCrypt.Net.BCrypt.Verify(password, user.PasswordHash))
             {
-                await _emailService.SendEmailAsync(
-                    "wwestlake@lagdaemon.com",
-                    "Login Failed",
-                    $"Login failed for: {usernameOrEmail} at {timestamp} (bad password)"
-                );
                 throw new UnauthorizedAccessException("Invalid credentials.");
             }
-
-            await _emailService.SendEmailAsync(
-                "wwestlake@lagdaemon.com",
-                "Login Success",
-                $"User {user.Email} logged in at {timestamp}"
-            );
 
             return await _tokenService.GenerateTokenAsync(user.Email);
         }

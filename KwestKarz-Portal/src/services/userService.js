@@ -1,7 +1,7 @@
 import { getToken } from './sessionService';
 import config from '../config';
 
-const baseUrl = `${config.apiBaseUrl}/UserAccounts`;
+const baseUrl = `${config.apiBaseUrl}/api/UserAccounts`;
 
 function authHeader() {
   const token = getToken();
@@ -29,7 +29,7 @@ export async function getUserById(id) {
 }
 
 export async function createUser(data) {
-  const res = await fetch(`${config.apiBaseUrl}/Auth/create-account`, {
+  const res = await fetch(`${config.apiBaseUrl}/api/Auth/create-account`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
@@ -82,7 +82,7 @@ export async function inviteUser(email) {
 }
 
 export async function changePassword(data) {
-    const res = await fetch(`${config.apiBaseUrl}/Auth/change-password`, {
+    const res = await fetch(`${config.apiBaseUrl}/api/Auth/change-password`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
