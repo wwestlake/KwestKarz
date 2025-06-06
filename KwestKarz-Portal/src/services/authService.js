@@ -1,7 +1,7 @@
 import config from '../config';
 
 export async function login(usernameOrEmail, password) {
-  const res = await fetch(`${config.apiBaseUrl}/auth/login`, {
+  const res = await fetch(`${config.apiBaseUrl}/Auth/login`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
