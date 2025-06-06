@@ -31,7 +31,7 @@ jobs:
         working-directory: ./KwestKarz-Portal
         run: npm run build
         env:
-          VITE_API_BASE_URL: https://kwestkarz.lagdaemon.com/
+          VITE_API_BASE_URL: https://kwestkarz.lagdaemon.com
 
       - name: Upload frontend artifacts
         uses: actions/upload-artifact@v4
