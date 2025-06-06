@@ -65,6 +65,17 @@ jobs:
           name: api-artifact
           path: api-artifact
 
+      - name: Upload source code to server
+        uses: appleboy/scp-action@v0.1.5
+        with:
+          host: ${{ secrets.DROPLET_HOST }}
+          username: ${{ secrets.DROPLET_USER }}
+          key: ${{ secrets.DROPLET_SSH_KEY }}
+          passphrase: ${{ secrets.DROPLET_SSH_PASSPHRASE }}
+          port: 22
+          source: "./Kwestkarz-API/**"
+          target: "/home/${{ secrets.DROPLET_USER }}/kwestkarz-src/api-source"
+
       - name: Debug portal artifact contents
         run: ls -R portal-artifact
 
