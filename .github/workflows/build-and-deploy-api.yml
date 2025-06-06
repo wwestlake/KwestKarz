@@ -73,7 +73,7 @@ jobs:
           key: ${{ secrets.DROPLET_SSH_KEY }}
           passphrase: ${{ secrets.DROPLET_SSH_PASSPHRASE }}
           port: 22
-          source: "./Kwestkarz-API/**"
+          source: "./Kwestkarz-API"
           target: "/home/${{ secrets.DROPLET_USER }}/kwestkarz-src/api-source"
 
       - name: Debug portal artifact contents
