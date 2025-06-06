@@ -104,14 +104,4 @@ jobs:
           passphrase: ${{ secrets.DROPLET_SSH_PASSPHRASE }}
           port: 22
           script: |
-            echo "${{ secrets.DEPLOY_SUDO_PASSWORD }}" | sudo -S systemctl stop kwestkarz.service || true
-            export DOTNET_ROOT=~/.dotnet
-            export PATH=$PATH:$DOTNET_ROOT:$DOTNET_ROOT/tools:~/.dotnet/tools
-            mkdir -p ~/.dotnet/tools
-            dotnet tool install dotnet-ef --tool-path ~/.dotnet/tools || true
-            export ConnectionStrings__KwestKarzDb="${{ secrets.CONNECTION_STRING }}"
-            export google__email="${{ secrets.GOOGLE_EMAIL_ADDR }}"
-            export google__password="${{ secrets.GOOGLE_SMTP_PASSWORD }}"
-            cd /home/${{ secrets.DROPLET_USER }}/kwestkarz-src/api-source
-            ~/.dotnet/tools/dotnet-ef database update --project KwestKarz.csproj
-            echo "${{ secrets.DEPLOY_SUDO_PASSWORD }}" | sudo -S systemctl start kwestkarz.service
+            bash /home/${{ secrets.DROPLET_USER }}/deploy-api.sh "${{ secrets.DEPLOY_SUDO_PASSWORD }}" "${{ secrets.CONNECTION_STRING }}" "${{ secrets.GOOGLE_EMAIL_ADDR }}" "${{ secrets.GOOGLE_SMTP_PASSWORD }}" "${{ secrets.DROPLET_USER }}"
