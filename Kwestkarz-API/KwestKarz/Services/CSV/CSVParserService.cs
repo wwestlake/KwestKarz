@@ -1,12 +1,13 @@
 ﻿using System.Globalization;
 using CsvHelper;
 using CsvHelper.Configuration;
-using KwestKarz.Services;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using KwestKarz.Entities;
+using KwestKarz.Services.CSV;
 
-namespace KwestKarz.Services
+namespace KwestKarz.Services.CSV
 {
     public class CSVParserService : ICSVParserService
     {
@@ -23,8 +24,13 @@ namespace KwestKarz.Services
             using var reader = new StreamReader(csvStream);
             using var csv = new CsvReader(reader, config);
 
-            var records = csv.GetRecords<T>().ToList();
-            return records;
+            // If a map exists for the type, register it
+            if (typeof(T) == typeof(TripEarnings))
+            {
+                csv.Context.RegisterClassMap<TripEarningsMap>();
+            }
+
+            return csv.GetRecords<T>().ToList();
         }
     }
 }
