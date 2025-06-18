@@ -10,7 +10,7 @@ export default function Home() {
         onClick={() => window.location.href = "/vehicles"}
       />
       <div className="text-center text-sm text-secondary mt-8">
-        <p>More info and feature sections coming soon.</p>
+        <p>More info FOR CURTIS and feature sections coming soon.</p>
       </div>
     </>
   );
